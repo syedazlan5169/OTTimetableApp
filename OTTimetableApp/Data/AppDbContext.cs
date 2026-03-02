@@ -6,6 +6,8 @@ namespace OTTimetableApp.Data;
 
 public class AppDbContext : DbContext
 {
+    public DbSet<ShiftAssignment> ShiftAssignments => Set<ShiftAssignment>();
+    public DbSet<ShiftSlot> ShiftSlots => Set<ShiftSlot>();
     public DbSet<Calendar> Calendars => Set<Calendar>();
     public DbSet<CalendarDay> CalendarDays => Set<CalendarDay>();
     public DbSet<Group> Groups => Set<Group>();
@@ -44,6 +46,46 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(d => d.CalendarId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // One CalendarDay has 3 ShiftAssignment rows (Night/Morning/Evening)
+        modelBuilder.Entity<ShiftAssignment>()
+            .HasIndex(x => new { x.CalendarDayId, x.ShiftType })
+            .IsUnique();
+
+        modelBuilder.Entity<ShiftAssignment>()
+            .HasOne(x => x.CalendarDay)
+            .WithMany()
+            .HasForeignKey(x => x.CalendarDayId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ShiftSlot>()
+            .HasIndex(x => new { x.ShiftAssignmentId, x.SlotIndex })
+            .IsUnique();
+
+        modelBuilder.Entity<ShiftSlot>()
+            .HasOne(x => x.ShiftAssignment)
+            .WithMany()
+            .HasForeignKey(x => x.ShiftAssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Employee FKs (set null if employee removed later)
+        modelBuilder.Entity<ShiftSlot>()
+            .HasOne(x => x.PlannedEmployee)
+            .WithMany()
+            .HasForeignKey(x => x.PlannedEmployeeId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<ShiftSlot>()
+            .HasOne(x => x.ActualEmployee)
+            .WithMany()
+            .HasForeignKey(x => x.ActualEmployeeId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<ShiftSlot>()
+            .HasOne(x => x.ReplacedEmployee)
+            .WithMany()
+            .HasForeignKey(x => x.ReplacedEmployeeId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 
     public static DbContextOptions<AppDbContext> BuildOptions()
