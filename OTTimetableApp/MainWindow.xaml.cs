@@ -3,6 +3,7 @@ using OTTimetableApp.Data;
 using OTTimetableApp.Infrastructure;
 using OTTimetableApp.Services;
 using OTTimetableApp.Data.Models;
+using OTTimetableApp.ViewModels;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,12 +29,16 @@ namespace OTTimetableApp
             TestGenerateCalendar();
 
             using var db = new AppDbContext(AppDbContext.BuildOptions());
-            var cal = db.Calendars.First(c => c.Name == "Test 2026");
-            var dayCount = db.CalendarDays.Count(d => d.CalendarId == cal.Id);
-            var shiftCount = db.ShiftAssignments.Count(s => s.CalendarDay.CalendarId == cal.Id);
-            var slotCount = db.ShiftSlots.Count(s => s.ShiftAssignment.CalendarDay.CalendarId == cal.Id);
+            var calId = db.Calendars.First(c => c.Name == "Test 2026").Id;
 
-            MessageBox.Show($"Days={dayCount}\nShifts={shiftCount}\nSlots={slotCount}");
+            var vm = new MonthViewerVM
+            {
+                SelectedCalendarId = calId,
+                SelectedMonth = 1
+            };
+            vm.Load();
+
+            MessageBox.Show($"{vm.MonthTitle}\nRows loaded = {vm.Days.Count}");
         }
 
 private void TestGenerateCalendar()
