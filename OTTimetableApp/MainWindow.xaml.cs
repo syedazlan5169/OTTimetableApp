@@ -26,6 +26,14 @@ namespace OTTimetableApp
             InitializeComponent();
 
             TestGenerateCalendar();
+
+            using var db = new AppDbContext(AppDbContext.BuildOptions());
+            var cal = db.Calendars.First(c => c.Name == "Test 2026");
+            var dayCount = db.CalendarDays.Count(d => d.CalendarId == cal.Id);
+            var shiftCount = db.ShiftAssignments.Count(s => s.CalendarDay.CalendarId == cal.Id);
+            var slotCount = db.ShiftSlots.Count(s => s.ShiftAssignment.CalendarDay.CalendarId == cal.Id);
+
+            MessageBox.Show($"Days={dayCount}\nShifts={shiftCount}\nSlots={slotCount}");
         }
 
 private void TestGenerateCalendar()
