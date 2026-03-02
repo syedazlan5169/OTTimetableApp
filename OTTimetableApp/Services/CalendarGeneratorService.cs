@@ -84,6 +84,63 @@ public class CalendarGeneratorService
         cal.IsGenerated = true;
 
         _db.SaveChanges();
+        CreateShiftAssignmentsAndSlots(cal.Id);
         tx.Commit();
+    }
+
+    private void CreateShiftAssignmentsAndSlots(int calendarId)
+    {
+        var days = _db.CalendarDays
+            .Where(d => d.CalendarId == calendarId)
+            .OrderBy(d => d.Date)
+            .ToList();
+
+        // Load group members (base slots) once
+        var baseMembers = _db.GroupMembers
+            .AsNoTracking()
+            .ToList();
+
+        foreach (var day in days)
+        {
+            // For each day, create 3 shift assignments with locked GroupId
+            var shifts = new[]
+            {
+            new ShiftAssignment { CalendarDayId = day.Id, ShiftType = ShiftType.Night,   GroupId = day.NightGroupId },
+            new ShiftAssignment { CalendarDayId = day.Id, ShiftType = ShiftType.Morning, GroupId = day.MorningGroupId },
+            new ShiftAssignment { CalendarDayId = day.Id, ShiftType = ShiftType.Evening, GroupId = day.EveningGroupId },
+        };
+
+            _db.ShiftAssignments.AddRange(shifts);
+            _db.SaveChanges(); // so shifts have IDs
+
+            foreach (var sh in shifts)
+            {
+                // Find the 5 base warrants for this group
+                var gm = baseMembers
+                    .Where(x => x.GroupId == sh.GroupId)
+                    .OrderBy(x => x.SlotIndex)
+                    .ToList();
+
+                // Safety: if missing slots, still generate 5
+                for (int slotIndex = 1; slotIndex <= 5; slotIndex++)
+                {
+                    var plannedEmpId = gm.FirstOrDefault(x => x.SlotIndex == slotIndex)?.EmployeeId;
+
+                    var fillType = plannedEmpId == null ? SlotFillType.Empty : SlotFillType.Planned;
+
+                    _db.ShiftSlots.Add(new ShiftSlot
+                    {
+                        ShiftAssignmentId = sh.Id,
+                        SlotIndex = slotIndex,
+                        PlannedEmployeeId = plannedEmpId,
+                        ActualEmployeeId = plannedEmpId,
+                        ReplacedEmployeeId = null,
+                        FillType = fillType
+                    });
+                }
+
+                _db.SaveChanges();
+            }
+        }
     }
 }
