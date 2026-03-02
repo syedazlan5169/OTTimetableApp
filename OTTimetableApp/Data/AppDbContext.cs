@@ -6,14 +6,15 @@ namespace OTTimetableApp.Data;
 
 public class AppDbContext : DbContext
 {
-    public DbSet<ShiftAssignment> ShiftAssignments => Set<ShiftAssignment>();
-    public DbSet<ShiftSlot> ShiftSlots => Set<ShiftSlot>();
-    public DbSet<Calendar> Calendars => Set<Calendar>();
-    public DbSet<CalendarDay> CalendarDays => Set<CalendarDay>();
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Group> Groups => Set<Group>();
     public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
-    public DbSet<Employee> Employees => Set<Employee>();
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    public DbSet<Calendar> Calendars => Set<Calendar>();
+    public DbSet<CalendarDay> CalendarDays => Set<CalendarDay>();
+    public DbSet<ShiftAssignment> ShiftAssignments => Set<ShiftAssignment>();
+    public DbSet<ShiftSlot> ShiftSlots => Set<ShiftSlot>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
