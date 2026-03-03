@@ -8,6 +8,29 @@ namespace OTTimetableApp.Services;
 public class OtCalculatorService
 {
     private readonly IDbContextFactory<AppDbContext> _dbFactory;
+    private static DateTime ToDateTime(DateOnly d, TimeOnly t)
+    => d.ToDateTime(t);
+
+    private static (DateTime start, DateTime end)? GetOwnShiftInterval(CalendarDay day, int baseGroupId)
+    {
+        // if base group OFF => no own shift
+        if (day.OffGroupId == baseGroupId) return null;
+
+        // Determine which shift base group is assigned to
+        if (day.MorningGroupId == baseGroupId)
+            return (ToDateTime(day.Date, new TimeOnly(7, 0)), ToDateTime(day.Date, new TimeOnly(15, 0)));
+
+        if (day.EveningGroupId == baseGroupId)
+            return (ToDateTime(day.Date, new TimeOnly(14, 0)), ToDateTime(day.Date, new TimeOnly(23, 0)));
+
+        if (day.NightGroupId == baseGroupId)
+        {
+            // remember: night shift for row date means 22:00 previous day -> 07:00 on this day
+            return (ToDateTime(day.Date.AddDays(-1), new TimeOnly(22, 0)), ToDateTime(day.Date, new TimeOnly(7, 0)));
+        }
+
+        return null;
+    }
 
     private static bool IsBaseGroupOffOnDate(CalendarDay d, int baseGroupId)
     => d.OffGroupId == baseGroupId;
@@ -70,42 +93,290 @@ public class OtCalculatorService
         var shiftById = shifts.ToDictionary(s => s.Id);
 
         var lines = new List<OtClaimLine>();
+        var raw = new List<RawSeg>();
 
         foreach (var sl in slots)
         {
             var sh = shiftById[sl.ShiftAssignmentId];
-            var rowDay = dayById[sh.CalendarDayId]; // this is the timetable row date (clock-out date for Night)
+            var rowDay = dayById[sh.CalendarDayId]; // timetable row date
 
-            // On PH / PHG, own shift is claimable. On normal days, own shift is NOT claimable.
+            // Own shift skip logic (but allow PH/PHG)
             if (IsOwnShift(rowDay, baseGroupId, sh.ShiftType))
             {
-                // Use rowDay date for decision (for Night shift we handle per segment later)
                 var catForDay = ResolveCategory(rowDay, baseGroupId, phGantianDates);
-
                 if (catForDay != OtCategory.KelepasanAm && catForDay != OtCategory.KelepasanAmGantian)
                     continue;
             }
 
-            // Build correct date/time segments for this shift
             var segments = GetShiftSegments(rowDay.Date, sh.ShiftType);
 
             foreach (var seg in segments)
             {
-                // Resolve category using the segment's claim date
                 if (!dayByDate.TryGetValue(seg.date, out var segDay))
-                    continue; // outside loaded window (rare)
+                    continue;
 
                 var cat = ResolveCategory(segDay, baseGroupId, phGantianDates);
 
-                // Split seg into Day/Night bands
-                lines.AddRange(SplitDayNight(seg.date, seg.from, seg.to, cat));
+                // Build DateTime interval
+                var startDt = ToDateTime(seg.date, seg.from);
+                var endDt = ToDateTime(seg.date, seg.to);
+
+                // Special: 00:00 means next day boundary for end
+                if (seg.to == new TimeOnly(0, 0) && seg.from != new TimeOnly(0, 0))
+                    endDt = ToDateTime(seg.date.AddDays(1), new TimeOnly(0, 0));
+
+                // WorkingDay overlap rule: if employee has own shift SAME DATE,
+                // and OT overlaps own shift, claim starts after own shift ends.
+                if (cat == OtCategory.WorkingDay)
+                {
+                    var own = GetOwnShiftInterval(segDay, baseGroupId);
+                    if (own != null)
+                    {
+                        var (ownStart, ownEnd) = own.Value;
+                        // overlap
+                        if (startDt < ownEnd && endDt > ownStart)
+                        {
+                            // claim only after own shift end
+                            startDt = (startDt < ownEnd) ? ownEnd : startDt;
+                        }
+                    }
+                }
+
+                if (endDt > startDt)
+                {
+                    raw.Add(new RawSeg
+                    {
+                        Start = startDt,
+                        End = endDt,
+                        Category = cat
+                    });
+                }
             }
         }
 
-        return lines
+        // 1) merge overlaps (fix 14-15, 22-23)
+        var mergedRaw = MergeOverlaps(raw);
+
+        // 2) compute deductions from continuous chains
+        var deductions = BuildDeductions(mergedRaw);
+
+        // 3) split to day/night bands
+        var bandSegs = SplitIntoBands(mergedRaw);
+
+        // 4) subtract deductions
+        var finalSegs = ApplyDeductions(bandSegs, deductions);
+
+        // 5) convert to claim lines
+        var outLines = ToClaimLines(finalSegs);
+
+        // 6) month filter (optional; depends your payroll practice)
+        return outLines
             .Where(l => l.ClaimDate >= start && l.ClaimDate <= end)
-            .OrderBy(l => l.ClaimDate)
-            .ThenBy(l => l.From)
+            .ToList();
+    }
+
+    private static List<RawSeg> MergeOverlaps(List<RawSeg> input)
+    {
+        var sorted = input
+            .Where(x => x.End > x.Start)
+            .OrderBy(x => x.Start)
+            .ThenBy(x => x.End)
+            .ToList();
+
+        var result = new List<RawSeg>();
+        foreach (var s in sorted)
+        {
+            if (result.Count == 0)
+            {
+                result.Add(new RawSeg { Start = s.Start, End = s.End, Category = s.Category });
+                continue;
+            }
+
+            var last = result[^1];
+
+            // Merge if overlap/adjacent AND same category (category affects rates)
+            if (s.Start <= last.End && s.Category == last.Category)
+            {
+                if (s.End > last.End) last.End = s.End;
+            }
+            else
+            {
+                result.Add(new RawSeg { Start = s.Start, End = s.End, Category = s.Category });
+            }
+        }
+
+        return result;
+    }
+
+    private static List<(DateTime start, DateTime end)> BuildDeductions(List<RawSeg> merged)
+    {
+        // merged must be non-overlapping for correct chain durations
+        var deductions = new List<(DateTime start, DateTime end)>();
+
+        // Build continuous chains (gap breaks counter)
+        for (int i = 0; i < merged.Count; i++)
+        {
+            var chainStart = merged[i].Start;
+            var chainEnd = merged[i].End;
+
+            int j = i;
+            while (j + 1 < merged.Count && merged[j + 1].Start <= chainEnd)
+            {
+                // continuous (touching/overlapping)
+                chainEnd = (merged[j + 1].End > chainEnd) ? merged[j + 1].End : chainEnd;
+                j++;
+            }
+
+            var totalHours = (chainEnd - chainStart).TotalHours;
+            int n = (int)Math.Floor(totalHours / 9.0);
+
+            for (int k = 1; k <= n; k++)
+            {
+                // deduct the 9th hour itself
+                var dStart = chainStart.AddHours(k * 9 - 1);
+                var dEnd = chainStart.AddHours(k * 9);
+                deductions.Add((dStart, dEnd));
+            }
+
+            i = j;
+        }
+
+        return deductions;
+    }
+
+    private static List<OtSeg> SplitIntoBands(List<RawSeg> raw)
+    {
+        var result = new List<OtSeg>();
+
+        foreach (var r in raw)
+        {
+            var cur = r.Start;
+
+            while (cur < r.End)
+            {
+                var band = GetBand(cur);
+                var nextBoundary = GetNextBandBoundary(cur);
+
+                var segEnd = r.End < nextBoundary ? r.End : nextBoundary;
+
+                if (segEnd > cur)
+                {
+                    result.Add(new OtSeg
+                    {
+                        Start = cur,
+                        End = segEnd,
+                        Category = r.Category,
+                        Band = band
+                    });
+                }
+
+                cur = segEnd;
+            }
+        }
+
+        return result;
+    }
+
+    private static RateBand GetBand(DateTime dt)
+    {
+        var t = dt.TimeOfDay;
+        var dayStart = new TimeSpan(6, 0, 0);
+        var nightStart = new TimeSpan(22, 0, 0);
+        return (t >= dayStart && t < nightStart) ? RateBand.Day : RateBand.Night;
+    }
+
+    private static DateTime GetNextBandBoundary(DateTime dt)
+    {
+        var d = dt.Date;
+        var dayStart = d.AddHours(6);
+        var nightStart = d.AddHours(22);
+        var nextDayStart = d.AddDays(1).AddHours(6);
+
+        // If we are in night band: boundary is 06:00 next (same day if before 6, else next day)
+        if (GetBand(dt) == RateBand.Night)
+        {
+            if (dt < dayStart) return dayStart;
+            return nextDayStart;
+        }
+
+        // In day band: boundary is 22:00 same day
+        return nightStart;
+    }
+
+    private static List<OtSeg> ApplyDeductions(List<OtSeg> segs, List<(DateTime start, DateTime end)> deductions)
+    {
+        var result = segs;
+
+        foreach (var d in deductions)
+        {
+            var next = new List<OtSeg>();
+
+            foreach (var s in result)
+            {
+                // no overlap
+                if (d.end <= s.Start || d.start >= s.End)
+                {
+                    next.Add(s);
+                    continue;
+                }
+
+                // left piece
+                if (d.start > s.Start)
+                {
+                    next.Add(new OtSeg
+                    {
+                        Start = s.Start,
+                        End = d.start,
+                        Category = s.Category,
+                        Band = s.Band
+                    });
+                }
+
+                // right piece
+                if (d.end < s.End)
+                {
+                    next.Add(new OtSeg
+                    {
+                        Start = d.end,
+                        End = s.End,
+                        Category = s.Category,
+                        Band = s.Band
+                    });
+                }
+            }
+
+            result = next;
+        }
+
+        return result;
+    }
+
+    private static List<OtClaimLine> ToClaimLines(List<OtSeg> segs)
+    {
+        return segs
+            .Where(s => s.End > s.Start)
+            .Select(s =>
+            {
+                var claimDate = DateOnly.FromDateTime(s.Start);
+                var from = TimeOnly.FromDateTime(s.Start);
+                var to = TimeOnly.FromDateTime(s.End);
+
+                var hours = (decimal)(s.End - s.Start).TotalHours;
+                var rate = OtRateTable.GetRate(s.Category, s.Band);
+
+                return new OtClaimLine
+                {
+                    ClaimDate = claimDate,
+                    From = from,
+                    To = to,
+                    Category = s.Category,
+                    Band = s.Band,
+                    Hours = hours,
+                    Rate = rate
+                };
+            })
+            .OrderBy(x => x.ClaimDate)
+            .ThenBy(x => x.From)
             .ToList();
     }
 
@@ -295,5 +566,20 @@ public class OtCalculatorService
             ShiftType.Evening => day.EveningGroupId == baseGroupId,
             _ => false
         };
+    }
+
+    private sealed class OtSeg
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }          // End > Start
+        public OtCategory Category { get; set; }
+        public RateBand Band { get; set; }         // after split
+    }
+
+    private sealed class RawSeg
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }          // End > Start
+        public OtCategory Category { get; set; }
     }
 }
