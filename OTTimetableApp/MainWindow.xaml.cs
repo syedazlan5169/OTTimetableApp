@@ -121,6 +121,16 @@ public partial class MainWindow : Window
         _vm.LoadMonth();
     }
 
+    private void ManageEmployees_Click(object sender, RoutedEventArgs e)
+    {
+        var win = App.Services.GetRequiredService<EmployeeManagerWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+
+        // reload month view after employee edits (names/options might change)
+        _vm.LoadMonth();
+    }
+
     private void DebugClaim_Click(object sender, RoutedEventArgs e)
     {
         try

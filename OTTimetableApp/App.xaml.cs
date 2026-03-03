@@ -38,6 +38,9 @@ public partial class App : Application
         services.AddSingleton<SlotUpdateService>();
         services.AddSingleton<PublicHolidayService>();
         services.AddSingleton<OtCalculatorService>();
+        services.AddSingleton<EmployeeService>();
+        services.AddTransient<EmployeeManagerVM>();
+        services.AddTransient<EmployeeManagerWindow>();
 
         Services = services.BuildServiceProvider();
 
