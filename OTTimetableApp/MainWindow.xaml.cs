@@ -28,4 +28,28 @@ public partial class MainWindow : Window
     {
         _vm.LoadMonth();
     }
+
+    private void PH_Changed(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement fe) return;
+        if (fe.DataContext is not DayRowVM day) return;
+
+        _vm.SavePH(day.CalendarDayId, day.IsPublicHoliday, day.PublicHolidayName);
+    }
+
+    private void PHName_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement fe) return;
+        if (fe.DataContext is not DayRowVM day) return;
+
+        _vm.SavePH(day.CalendarDayId, day.IsPublicHoliday, day.PublicHolidayName);
+    }
+
+    private void Slot_DropDownClosed(object sender, EventArgs e)
+    {
+        if (sender is not FrameworkElement fe) return;
+        if (fe.DataContext is not ShiftSlotVM slot) return;
+
+        _vm.SaveSlot(slot.ShiftSlotId, slot.ActualEmployeeId);
+    }
 }

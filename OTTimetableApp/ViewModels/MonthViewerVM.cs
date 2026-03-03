@@ -61,6 +61,16 @@ public partial class MonthViewerVM : ObservableObject
         foreach (var r in payload.Rows)
             Days.Add(r);
     }
+
+    public void SavePH(int calendarDayId, bool isPh, string? phName)
+    {
+        _svc.SavePublicHoliday(calendarDayId, isPh, phName);
+    }
+
+    public void SaveSlot(int shiftSlotId, int? newActualEmployeeId)
+    {
+        _svc.SaveSlotChange(shiftSlotId, newActualEmployeeId);
+    }
 }
 
 public class MonthOptionVM

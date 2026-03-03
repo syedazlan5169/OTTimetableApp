@@ -53,6 +53,10 @@ public class MonthViewService
             .Select(e => new EmployeeOptionVM { Id = e.Id, Name = e.Name })
             .ToList();
 
+        // Add a blank option at the top (Id=0 will represent NULL)
+        employees.Insert(0, new EmployeeOptionVM { Id = 0, Name = "(None)" });
+
+
         var days = db.CalendarDays
             .AsNoTracking()
             .Where(d => d.CalendarId == calendarId && d.Date >= start && d.Date <= end)
@@ -149,5 +153,54 @@ public class MonthViewService
         }
 
         return result;
+    }
+
+    public void SavePublicHoliday(int calendarDayId, bool isPh, string? phName)
+    {
+        using var db = _dbFactory.CreateDbContext();
+
+        var day = db.CalendarDays.First(d => d.Id == calendarDayId);
+        day.IsPublicHoliday = isPh;
+        day.PublicHolidayName = string.IsNullOrWhiteSpace(phName) ? null : phName.Trim();
+
+        db.SaveChanges();
+    }
+
+    public void SaveSlotChange(int shiftSlotId, int? newActualEmployeeId)
+    {
+        if (newActualEmployeeId == 0) newActualEmployeeId = null;
+        
+        using var db = _dbFactory.CreateDbContext();
+        var slot = db.ShiftSlots.First(s => s.Id == shiftSlotId);
+
+        slot.ActualEmployeeId = newActualEmployeeId;
+
+        // Determine FillType + ReplacedEmployeeId based on planned slot
+        // PlannedEmployeeId null means this is an "empty warrant" originally.
+        if (newActualEmployeeId == null)
+        {
+            slot.FillType = SlotFillType.Empty;
+            slot.ReplacedEmployeeId = null;
+        }
+        else if (slot.PlannedEmployeeId == null)
+        {
+            // Filling an empty warrant
+            slot.FillType = SlotFillType.EmptyFill;
+            slot.ReplacedEmployeeId = null;
+        }
+        else if (newActualEmployeeId == slot.PlannedEmployeeId)
+        {
+            // Same as planned
+            slot.FillType = SlotFillType.Planned;
+            slot.ReplacedEmployeeId = null;
+        }
+        else
+        {
+            // Replacing planned member
+            slot.FillType = SlotFillType.Replacement;
+            slot.ReplacedEmployeeId = slot.PlannedEmployeeId;
+        }
+
+        db.SaveChanges();
     }
 }

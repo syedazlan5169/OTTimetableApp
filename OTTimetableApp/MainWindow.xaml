@@ -57,8 +57,10 @@
                                 <TextBlock Text="{Binding DayName}" />
                                 <CheckBox Content="Public Holiday"
                                           IsChecked="{Binding IsPublicHoliday}"
-                                          IsEnabled="True"/>
-                                <TextBox Text="{Binding PublicHolidayName}" Height="24"/>
+                                          Checked="PH_Changed"
+                                          Unchecked="PH_Changed"/>
+                                <TextBox Text="{Binding PublicHolidayName}" Height="24"
+                                         LostFocus="PHName_LostFocus"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -79,7 +81,8 @@
                                                           ItemsSource="{Binding EmployeeOptions}"
                                                           DisplayMemberPath="Name"
                                                           SelectedValuePath="Id"
-                                                          SelectedValue="{Binding ActualEmployeeId}"/>
+                                                          SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
+                                                          DropDownClosed="Slot_DropDownClosed"/>
                                             </DockPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -104,7 +107,8 @@
                                                           ItemsSource="{Binding EmployeeOptions}"
                                                           DisplayMemberPath="Name"
                                                           SelectedValuePath="Id"
-                                                          SelectedValue="{Binding ActualEmployeeId}"/>
+                                                          SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
+                                                          DropDownClosed="Slot_DropDownClosed"/>
                                             </DockPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -129,7 +133,8 @@
                                                           ItemsSource="{Binding EmployeeOptions}"
                                                           DisplayMemberPath="Name"
                                                           SelectedValuePath="Id"
-                                                          SelectedValue="{Binding ActualEmployeeId}"/>
+                                                          SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
+                                                          DropDownClosed="Slot_DropDownClosed"/>
                                             </DockPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
