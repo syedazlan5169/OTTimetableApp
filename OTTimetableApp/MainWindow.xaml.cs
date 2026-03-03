@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using OTTimetableApp.Data;
 using OTTimetableApp.Services;
 using OTTimetableApp.ViewModels;
 using System.Windows;
@@ -11,13 +13,15 @@ public partial class MainWindow : Window
     private readonly MonthViewerVM _vm;
     private readonly SlotUpdateService _slotSvc;
     private readonly PublicHolidayService _phSvc;
+    private readonly OtCalculatorService _otSvc;
 
-    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc, PublicHolidayService phSvc)
+    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc, PublicHolidayService phSvc, OtCalculatorService otSvc)
     {
         InitializeComponent();
         _vm = vm;
         _slotSvc = slotSvc;
         _phSvc = phSvc;
+        _otSvc = otSvc;
 
         DataContext = _vm;
 
@@ -115,6 +119,42 @@ public partial class MainWindow : Window
         // Reload calendars after closing manager
         _vm.LoadCalendars();
         _vm.LoadMonth();
+    }
+
+    private void DebugClaim_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_vm.SelectedCalendarId == 0)
+            {
+                MessageBox.Show("Select a calendar first.");
+                return;
+            }
+
+            // Pick first active employee for now (we'll add employee selector later)
+            using var db = App.Services.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext();
+            var emp = db.Employees.AsNoTracking().FirstOrDefault(x => x.IsActive);
+
+            if (emp == null)
+            {
+                MessageBox.Show("No active employee found.");
+                return;
+            }
+
+            var lines = _otSvc.BuildMonthlyClaim(_vm.SelectedCalendarId, emp.Id, _vm.SelectedMonth);
+
+            var totalHours = lines.Sum(x => x.Hours);
+            var preview = string.Join("\n", lines.Take(8).Select(l =>
+                $"{l.ClaimDate:dd/MM/yyyy} {l.From:HH\\:mm}-{l.To:HH\\:mm} {l.Band} {l.Category} {l.Hours}h"));
+
+            MessageBox.Show(
+                $"Employee: {emp.Name}\nLines: {lines.Count}\nTotal Hours: {totalHours}\n\nFirst lines:\n{preview}",
+                "Debug Claim");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.ToString(), "Debug Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
 
