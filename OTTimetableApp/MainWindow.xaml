@@ -82,7 +82,13 @@
                                                           DisplayMemberPath="Name"
                                                           SelectedValuePath="Id"
                                                           SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
-                                                          DropDownClosed="Slot_DropDownClosed"/>
+                                                          DropDownClosed="Slot_DropDownClosed">
+                                                    <ComboBox.ItemContainerStyle>
+                                                        <Style TargetType="ComboBoxItem">
+                                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                                        </Style>
+                                                    </ComboBox.ItemContainerStyle>
+                                                </ComboBox>
                                             </DockPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -108,7 +114,13 @@
                                                           DisplayMemberPath="Name"
                                                           SelectedValuePath="Id"
                                                           SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
-                                                          DropDownClosed="Slot_DropDownClosed"/>
+                                                          DropDownClosed="Slot_DropDownClosed">
+                                                    <ComboBox.ItemContainerStyle>
+                                                        <Style TargetType="ComboBoxItem">
+                                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                                        </Style>
+                                                    </ComboBox.ItemContainerStyle>
+                                                </ComboBox>
                                             </DockPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -134,7 +146,13 @@
                                                           DisplayMemberPath="Name"
                                                           SelectedValuePath="Id"
                                                           SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
-                                                          DropDownClosed="Slot_DropDownClosed"/>
+                                                          DropDownClosed="Slot_DropDownClosed">
+                                                    <ComboBox.ItemContainerStyle>
+                                                        <Style TargetType="ComboBoxItem">
+                                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                                        </Style>
+                                                    </ComboBox.ItemContainerStyle>
+                                                </ComboBox>
                                             </DockPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

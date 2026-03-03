@@ -50,6 +50,22 @@ public partial class MainWindow : Window
         if (sender is not FrameworkElement fe) return;
         if (fe.DataContext is not ShiftSlotVM slot) return;
 
-        _vm.SaveSlot(slot.ShiftSlotId, slot.ActualEmployeeId);
+        try
+        {
+            _vm.SaveSlot(slot.ShiftSlotId, slot.ActualEmployeeId);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Not allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            // revert UI to None (0) – simplest safe revert
+            slot.ActualEmployeeId = 0;
+            _vm.SaveSlot(slot.ShiftSlotId, slot.ActualEmployeeId);
+        }
+
+        // Refresh month to recompute disabled items correctly (simple approach)
+        _vm.LoadMonth();
     }
+
+
 }

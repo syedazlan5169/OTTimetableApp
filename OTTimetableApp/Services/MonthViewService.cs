@@ -126,8 +126,30 @@ public class MonthViewService
 
                     if (slotsByShift.TryGetValue(sh.Id, out var shSlots))
                     {
+
+                        var usedIds = shSlots
+                        .Select(x => x.ActualEmployeeId)
+                        .Where(x => x.HasValue && x.Value != 0)
+                        .Select(x => x!.Value)
+                        .ToHashSet();
+
                         foreach (var sl in shSlots)
                         {
+
+                            // For this slot, allow its own current selection (so it doesn't disable itself)
+                            var usedExceptSelf = usedIds.ToHashSet();
+                            if (sl.ActualEmployeeId.HasValue && sl.ActualEmployeeId.Value != 0)
+                                usedExceptSelf.Remove(sl.ActualEmployeeId.Value);
+
+                            var optionList = employees
+                                .Select(o => new EmployeeOptionVM
+                                {
+                                    Id = o.Id,
+                                    Name = o.Name,
+                                    IsEnabled = (o.Id == 0) || !usedExceptSelf.Contains(o.Id) // allow (None)
+                                })
+                                .ToList();
+
                             svm.Slots.Add(new ShiftSlotVM
                             {
                                 ShiftSlotId = sl.Id,
@@ -136,7 +158,7 @@ public class MonthViewService
                                 ActualEmployeeId = sl.ActualEmployeeId,
                                 ReplacedEmployeeId = sl.ReplacedEmployeeId,
                                 FillType = sl.FillType,
-                                EmployeeOptions = employees
+                                EmployeeOptions = optionList
                             });
                         }
                     }
@@ -174,6 +196,18 @@ public class MonthViewService
         var slot = db.ShiftSlots.First(s => s.Id == shiftSlotId);
 
         slot.ActualEmployeeId = newActualEmployeeId;
+
+        // Guard: no duplicate within the same ShiftAssignment
+        if (newActualEmployeeId.HasValue)
+        {
+            var exists = db.ShiftSlots.Any(s =>
+                s.ShiftAssignmentId == slot.ShiftAssignmentId
+                && s.Id != slot.Id
+                && s.ActualEmployeeId == newActualEmployeeId);
+
+            if (exists)
+                throw new InvalidOperationException("Duplicate name in the same shift is not allowed.");
+        }
 
         // Determine FillType + ReplacedEmployeeId based on planned slot
         // PlannedEmployeeId null means this is an "empty warrant" originally.
