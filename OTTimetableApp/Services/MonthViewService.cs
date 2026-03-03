@@ -53,6 +53,10 @@ public class MonthViewService
             .Select(e => new EmployeeOptionVM { Id = e.Id, Name = e.Name })
             .ToList();
 
+        var empNameById = employees
+            .Where(x => x.Id != 0)
+            .ToDictionary(x => x.Id, x => x.Name);
+
         // Add a blank option at the top (Id=0 will represent NULL)
         employees.Insert(0, new EmployeeOptionVM { Id = 0, Name = "(None)" });
 
@@ -150,6 +154,24 @@ public class MonthViewService
                                 })
                                 .ToList();
 
+                            string statusText = sl.FillType switch
+                            {
+                                SlotFillType.Planned => "Planned",
+                                SlotFillType.Replacement => "Replace",
+                                SlotFillType.EmptyFill => "Fill",
+                                SlotFillType.Empty => "Empty",
+                                _ => "?"
+                            };
+
+                            string? replacesName = null;
+                            if (sl.FillType == SlotFillType.Replacement && sl.ReplacedEmployeeId.HasValue)
+                            {
+                                if (empNameById.TryGetValue(sl.ReplacedEmployeeId.Value, out var n))
+                                    replacesName = n;
+                                else
+                                    replacesName = "(UNKNOWN)";
+                            }
+
                             svm.Slots.Add(new ShiftSlotVM
                             {
                                 ShiftSlotId = sl.Id,
@@ -158,6 +180,8 @@ public class MonthViewService
                                 ActualEmployeeId = sl.ActualEmployeeId,
                                 ReplacedEmployeeId = sl.ReplacedEmployeeId,
                                 FillType = sl.FillType,
+                                StatusText = statusText,
+                                ReplacesName = replacesName,
                                 EmployeeOptions = optionList
                             });
                         }

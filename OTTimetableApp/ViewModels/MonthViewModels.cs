@@ -39,8 +39,9 @@ public class ShiftSlotVM
     public int? ReplacedEmployeeId { get; set; }
 
     public SlotFillType FillType { get; set; }
-
-    // for dropdown
+    public string StatusText { get; set; } = "";
+    public string? ReplacesName { get; set; }
+    
     public List<EmployeeOptionVM> EmployeeOptions { get; set; } = new();
 }
 

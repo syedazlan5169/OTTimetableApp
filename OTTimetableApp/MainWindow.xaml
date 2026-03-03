@@ -71,25 +71,79 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <TextBlock Text="{Binding Night.GroupName}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <!-- Group name -->
+                                <TextBlock Text="{Binding Night.GroupName}"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,4"/>
+
+                                <!-- Slots -->
                                 <ItemsControl ItemsSource="{Binding Night.Slots}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <DockPanel Margin="0,2">
-                                                <TextBlock Text="{Binding SlotIndex}" Width="20"/>
-                                                <ComboBox Width="200"
-                                                          ItemsSource="{Binding EmployeeOptions}"
-                                                          DisplayMemberPath="Name"
-                                                          SelectedValuePath="Id"
-                                                          SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
-                                                          DropDownClosed="Slot_DropDownClosed">
-                                                    <ComboBox.ItemContainerStyle>
-                                                        <Style TargetType="ComboBoxItem">
-                                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                            <StackPanel Margin="0,2">
+                                                <DockPanel>
+                                                    <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
+
+                                                    <!-- Status badge -->
+                                                    <Border Width="72" Height="22" CornerRadius="6"
+                                            Margin="6,0,6,0" Padding="6,0">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="LightGray"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="Planned">
+                                                                        <Setter Property="Background" Value="LightGreen"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                        <Setter Property="Background" Value="Khaki"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="EmptyFill">
+                                                                        <Setter Property="Background" Value="LightSkyBlue"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+
+                                                        <TextBlock Text="{Binding StatusText}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+
+                                                    <!-- Combo -->
+                                                    <ComboBox Width="200"
+                                              ItemsSource="{Binding EmployeeOptions}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id"
+                                              SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
+                                              DropDownClosed="Slot_DropDownClosed">
+                                                        <ComboBox.ItemContainerStyle>
+                                                            <Style TargetType="ComboBoxItem">
+                                                                <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                                            </Style>
+                                                        </ComboBox.ItemContainerStyle>
+                                                    </ComboBox>
+                                                </DockPanel>
+
+                                                <!-- Replaces who -->
+                                                <TextBlock Margin="98,2,0,0"
+                                           FontSize="11"
+                                           Foreground="DimGray"
+                                           Text="{Binding ReplacesName, StringFormat=Replaces: {0}}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
                                                         </Style>
-                                                    </ComboBox.ItemContainerStyle>
-                                                </ComboBox>
-                                            </DockPanel>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -99,29 +153,83 @@
                 </DataGridTemplateColumn>
 
                 <!-- Morning -->
-                <DataGridTemplateColumn Header="07:00 - 15:00" Width="300">
+                <DataGridTemplateColumn Header="22:00 - 07:00" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <TextBlock Text="{Binding Morning.GroupName}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <!-- Group name -->
+                                <TextBlock Text="{Binding Morning.GroupName}"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,4"/>
+
+                                <!-- Slots -->
                                 <ItemsControl ItemsSource="{Binding Morning.Slots}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <DockPanel Margin="0,2">
-                                                <TextBlock Text="{Binding SlotIndex}" Width="20"/>
-                                                <ComboBox Width="200"
-                                                          ItemsSource="{Binding EmployeeOptions}"
-                                                          DisplayMemberPath="Name"
-                                                          SelectedValuePath="Id"
-                                                          SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
-                                                          DropDownClosed="Slot_DropDownClosed">
-                                                    <ComboBox.ItemContainerStyle>
-                                                        <Style TargetType="ComboBoxItem">
-                                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                            <StackPanel Margin="0,2">
+                                                <DockPanel>
+                                                    <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
+
+                                                    <!-- Status badge -->
+                                                    <Border Width="72" Height="22" CornerRadius="6"
+                                            Margin="6,0,6,0" Padding="6,0">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="LightGray"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="Planned">
+                                                                        <Setter Property="Background" Value="LightGreen"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                        <Setter Property="Background" Value="Khaki"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="EmptyFill">
+                                                                        <Setter Property="Background" Value="LightSkyBlue"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+
+                                                        <TextBlock Text="{Binding StatusText}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+
+                                                    <!-- Combo -->
+                                                    <ComboBox Width="200"
+                                              ItemsSource="{Binding EmployeeOptions}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id"
+                                              SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
+                                              DropDownClosed="Slot_DropDownClosed">
+                                                        <ComboBox.ItemContainerStyle>
+                                                            <Style TargetType="ComboBoxItem">
+                                                                <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                                            </Style>
+                                                        </ComboBox.ItemContainerStyle>
+                                                    </ComboBox>
+                                                </DockPanel>
+
+                                                <!-- Replaces who -->
+                                                <TextBlock Margin="98,2,0,0"
+                                           FontSize="11"
+                                           Foreground="DimGray"
+                                           Text="{Binding ReplacesName, StringFormat=Replaces: {0}}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
                                                         </Style>
-                                                    </ComboBox.ItemContainerStyle>
-                                                </ComboBox>
-                                            </DockPanel>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -131,29 +239,83 @@
                 </DataGridTemplateColumn>
 
                 <!-- Evening -->
-                <DataGridTemplateColumn Header="14:00 - 23:00" Width="300">
+                <DataGridTemplateColumn Header="22:00 - 07:00" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <TextBlock Text="{Binding Evening.GroupName}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <!-- Group name -->
+                                <TextBlock Text="{Binding Evening.GroupName}"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,4"/>
+
+                                <!-- Slots -->
                                 <ItemsControl ItemsSource="{Binding Evening.Slots}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <DockPanel Margin="0,2">
-                                                <TextBlock Text="{Binding SlotIndex}" Width="20"/>
-                                                <ComboBox Width="200"
-                                                          ItemsSource="{Binding EmployeeOptions}"
-                                                          DisplayMemberPath="Name"
-                                                          SelectedValuePath="Id"
-                                                          SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
-                                                          DropDownClosed="Slot_DropDownClosed">
-                                                    <ComboBox.ItemContainerStyle>
-                                                        <Style TargetType="ComboBoxItem">
-                                                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                            <StackPanel Margin="0,2">
+                                                <DockPanel>
+                                                    <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
+
+                                                    <!-- Status badge -->
+                                                    <Border Width="72" Height="22" CornerRadius="6"
+                                            Margin="6,0,6,0" Padding="6,0">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="LightGray"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="Planned">
+                                                                        <Setter Property="Background" Value="LightGreen"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                        <Setter Property="Background" Value="Khaki"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding FillType}" Value="EmptyFill">
+                                                                        <Setter Property="Background" Value="LightSkyBlue"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+
+                                                        <TextBlock Text="{Binding StatusText}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+
+                                                    <!-- Combo -->
+                                                    <ComboBox Width="200"
+                                              ItemsSource="{Binding EmployeeOptions}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id"
+                                              SelectedValue="{Binding ActualEmployeeId, TargetNullValue=0}"
+                                              DropDownClosed="Slot_DropDownClosed">
+                                                        <ComboBox.ItemContainerStyle>
+                                                            <Style TargetType="ComboBoxItem">
+                                                                <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                                            </Style>
+                                                        </ComboBox.ItemContainerStyle>
+                                                    </ComboBox>
+                                                </DockPanel>
+
+                                                <!-- Replaces who -->
+                                                <TextBlock Margin="98,2,0,0"
+                                           FontSize="11"
+                                           Foreground="DimGray"
+                                           Text="{Binding ReplacesName, StringFormat=Replaces: {0}}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
                                                         </Style>
-                                                    </ComboBox.ItemContainerStyle>
-                                                </ComboBox>
-                                            </DockPanel>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
