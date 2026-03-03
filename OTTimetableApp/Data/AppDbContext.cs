@@ -21,8 +21,8 @@ public class AppDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Group>()
-             .HasIndex(g => g.Name)
-             .IsUnique();
+            .HasIndex(g => g.Name)
+            .IsUnique();
 
         modelBuilder.Entity<GroupMember>()
             .HasIndex(m => new { m.GroupId, m.SlotIndex })
@@ -87,6 +87,12 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.ReplacedEmployeeId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Employee>()
+            .HasOne(e => e.BaseGroup)
+            .WithMany()
+            .HasForeignKey(e => e.BaseGroupId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 
     public static DbContextOptions<AppDbContext> BuildOptions()
