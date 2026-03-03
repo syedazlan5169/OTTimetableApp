@@ -1,6 +1,7 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+﻿using Microsoft.Extensions.DependencyInjection;
 using OTTimetableApp.ViewModels;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace OTTimetableApp;
 
@@ -67,5 +68,15 @@ public partial class MainWindow : Window
         _vm.LoadMonth();
     }
 
+    private void ManageCalendars_Click(object sender, RoutedEventArgs e)
+    {
+        var win = App.Services.GetRequiredService<CalendarManagerWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+
+        // Reload calendars after closing manager
+        _vm.LoadCalendars();
+        _vm.LoadMonth();
+    }
 
 }

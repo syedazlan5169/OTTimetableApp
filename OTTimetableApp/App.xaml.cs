@@ -32,8 +32,9 @@ public partial class App : Application
 
         services.AddSingleton<MonthViewService>();
         services.AddSingleton<MonthViewerVM>();
-
         services.AddSingleton<MainWindow>();
+        services.AddSingleton<CalendarGeneratorService2>();
+        services.AddTransient<CalendarManagerWindow>();
 
         Services = services.BuildServiceProvider();
 

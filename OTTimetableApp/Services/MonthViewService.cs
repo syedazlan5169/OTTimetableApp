@@ -261,4 +261,46 @@ public class MonthViewService
 
         db.SaveChanges();
     }
+
+    public List<Group> ListGroups()
+    {
+        using var db = _dbFactory.CreateDbContext();
+        return db.Groups.AsNoTracking().OrderBy(g => g.Name).ToList();
+    }
+
+    public int CreateCalendar(string name, int year, int initNightGroupId, int initMorningGroupId, int initEveningGroupId)
+    {
+        name = name.Trim();
+
+        using var db = _dbFactory.CreateDbContext();
+
+        if (db.Calendars.Any(c => c.Name == name && c.Year == year))
+            throw new InvalidOperationException("Calendar with same name + year already exists.");
+
+        var cal = new Calendar
+        {
+            Name = name,
+            Year = year,
+            InitNightGroupId = initNightGroupId,
+            InitMorningGroupId = initMorningGroupId,
+            InitEveningGroupId = initEveningGroupId,
+            IsGenerated = false
+        };
+
+        db.Calendars.Add(cal);
+        db.SaveChanges();
+
+        return cal.Id;
+    }
+
+    public void DeleteCalendar(int calendarId)
+    {
+        using var db = _dbFactory.CreateDbContext();
+
+        var cal = db.Calendars.First(c => c.Id == calendarId);
+
+        // Cascade should delete days->shifts->slots (based on your FK config)
+        db.Calendars.Remove(cal);
+        db.SaveChanges();
+    }
 }

@@ -27,6 +27,11 @@
                           SelectedValuePath="Month"
                           SelectedValue="{Binding SelectedMonth}"
                           SelectionChanged="Month_Changed"/>
+
+                <Button Content="Manage Calendars"
+                        Width="140"
+                        Margin="12,0,0,0"
+        Click="ManageCalendars_Click"/>
             </StackPanel>
 
             <TextBlock Text="{Binding MonthTitle}"
@@ -153,7 +158,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- Morning -->
-                <DataGridTemplateColumn Header="22:00 - 07:00" Width="300">
+                <DataGridTemplateColumn Header="07:00 - 15:00" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel>
@@ -239,7 +244,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- Evening -->
-                <DataGridTemplateColumn Header="22:00 - 07:00" Width="300">
+                <DataGridTemplateColumn Header="14:00 - 23:00" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel>
