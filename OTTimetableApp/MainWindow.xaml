@@ -1,7 +1,7 @@
 ﻿<Window x:Class="OTTimetableApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="OT Timetable" Height="750" Width="1250">
+        Title="OT Timetable" Height="850" Width="1365" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -54,21 +54,66 @@
             <DataGrid.Columns>
 
                 <!-- Date / PH -->
-                <DataGridTemplateColumn Header="Tarikh" Width="200">
+                <DataGridTemplateColumn Header="Tarikh" Width="200" IsReadOnly="False">
                     <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Padding="6">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsPublicHoliday}" Value="True">
+                                                <Setter Property="Background" Value="#FFFFE5E5"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DateDisplay}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding DayName}" />
+
+                                    <!-- PH Label -->
+                                    <TextBlock Text="PUBLIC HOLIDAY"
+                               Foreground="Red"
+                               FontWeight="Bold"
+                               Visibility="Collapsed">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPublicHoliday}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <TextBlock Text="{Binding PublicHolidayName}"
+                               Foreground="DarkRed"
+                               FontStyle="Italic"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+
+                    <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <StackPanel>
                                 <TextBlock Text="{Binding DateDisplay}" FontWeight="Bold"/>
                                 <TextBlock Text="{Binding DayName}" />
+
                                 <CheckBox Content="Public Holiday"
-                                          IsChecked="{Binding IsPublicHoliday}"
-                                          Checked="PH_Changed"
-                                          Unchecked="PH_Changed"/>
-                                <TextBox Text="{Binding PublicHolidayName}" Height="24"
-                                         LostFocus="PHName_LostFocus"/>
+                          IsChecked="{Binding IsPublicHoliday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Click="PH_Click"/>
+
+                                <TextBox Text="{Binding PublicHolidayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Height="24"
+                         LostFocus="PHName_LostFocus"/>
                             </StackPanel>
                         </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <!-- Night -->

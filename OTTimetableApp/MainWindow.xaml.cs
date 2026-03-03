@@ -10,16 +10,20 @@ public partial class MainWindow : Window
 {
     private readonly MonthViewerVM _vm;
     private readonly SlotUpdateService _slotSvc;
+    private readonly PublicHolidayService _phSvc;
 
-    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc)
+    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc, PublicHolidayService phSvc)
     {
         InitializeComponent();
         _vm = vm;
         _slotSvc = slotSvc;
+        _phSvc = phSvc;
+
         DataContext = _vm;
 
         _vm.LoadCalendars();
         _vm.LoadMonth();
+        _phSvc = phSvc;
     }
 
     private void Calendar_Changed(object sender, SelectionChangedEventArgs e)
@@ -37,7 +41,16 @@ public partial class MainWindow : Window
         if (sender is not FrameworkElement fe) return;
         if (fe.DataContext is not DayRowVM day) return;
 
-        _vm.SavePH(day.CalendarDayId, day.IsPublicHoliday, day.PublicHolidayName);
+        try
+        {
+            _phSvc.UpdatePH(day.CalendarDayId, day.IsPublicHoliday, day.PublicHolidayName);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        _vm.LoadMonth();
     }
 
     private void PHName_LostFocus(object sender, RoutedEventArgs e)
@@ -45,7 +58,31 @@ public partial class MainWindow : Window
         if (sender is not FrameworkElement fe) return;
         if (fe.DataContext is not DayRowVM day) return;
 
-        _vm.SavePH(day.CalendarDayId, day.IsPublicHoliday, day.PublicHolidayName);
+        try
+        {
+            _phSvc.UpdatePH(day.CalendarDayId, day.IsPublicHoliday, day.PublicHolidayName);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        _vm.LoadMonth();
+    }
+
+    private void PH_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement fe) return;
+        if (fe.DataContext is not DayRowVM day) return;
+
+        try
+        {
+            _phSvc.UpdatePH(day.CalendarDayId, day.IsPublicHoliday, day.PublicHolidayName);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void Slot_DropDownClosed(object sender, EventArgs e)

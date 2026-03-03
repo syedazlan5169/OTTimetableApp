@@ -36,6 +36,7 @@ public partial class App : Application
         services.AddSingleton<CalendarGeneratorService2>();
         services.AddTransient<CalendarManagerWindow>();
         services.AddSingleton<SlotUpdateService>();
+        services.AddSingleton<PublicHolidayService>();
 
         Services = services.BuildServiceProvider();
 
