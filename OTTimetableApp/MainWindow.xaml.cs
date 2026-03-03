@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using OTTimetableApp.Services;
 using OTTimetableApp.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,12 +9,13 @@ namespace OTTimetableApp;
 public partial class MainWindow : Window
 {
     private readonly MonthViewerVM _vm;
+    private readonly SlotUpdateService _slotSvc;
 
-    public MainWindow(MonthViewerVM vm)
+    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc)
     {
         InitializeComponent();
-
         _vm = vm;
+        _slotSvc = slotSvc;
         DataContext = _vm;
 
         _vm.LoadCalendars();
@@ -48,24 +50,23 @@ public partial class MainWindow : Window
 
     private void Slot_DropDownClosed(object sender, EventArgs e)
     {
-        if (sender is not FrameworkElement fe) return;
-        if (fe.DataContext is not ShiftSlotVM slot) return;
+        if (sender is not ComboBox cb) return;
+        if (cb.DataContext is not ShiftSlotVM slotVm) return;
 
         try
         {
-            _vm.SaveSlot(slot.ShiftSlotId, slot.ActualEmployeeId);
+            int? selected = cb.SelectedValue as int?;
+            if (selected == 0) selected = null;
+
+            _slotSvc.UpdateSlot(slotVm.ShiftSlotId, selected);
+
+            _vm.LoadMonth();
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Not allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-            // revert UI to None (0) – simplest safe revert
-            slot.ActualEmployeeId = 0;
-            _vm.SaveSlot(slot.ShiftSlotId, slot.ActualEmployeeId);
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            _vm.LoadMonth();
         }
-
-        // Refresh month to recompute disabled items correctly (simple approach)
-        _vm.LoadMonth();
     }
 
     private void ManageCalendars_Click(object sender, RoutedEventArgs e)
@@ -78,5 +79,7 @@ public partial class MainWindow : Window
         _vm.LoadCalendars();
         _vm.LoadMonth();
     }
+
+
 
 }
