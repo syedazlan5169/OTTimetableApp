@@ -101,17 +101,12 @@
 
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Base Group:" VerticalAlignment="Center"/>
                     <DockPanel Grid.Row="10" Grid.Column="1">
-                        <ComboBox Width="220"
-                                  ItemsSource="{Binding Groups}"
-                                  DisplayMemberPath="Name"
-                                  SelectedValuePath="Id"
-                                  SelectedValue="{Binding Edit.BaseGroupId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <ComboBox.Style>
-                                <Style TargetType="ComboBox">
-                                    <Setter Property="IsEditable" Value="False"/>
-                                </Style>
-                            </ComboBox.Style>
-                        </ComboBox>
+                        <TextBlock Grid.Row="10" Grid.Column="0" Text="Base Group:" VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="10" Grid.Column="1"
+                                   Text="{Binding Edit.BaseGroupDisplay}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
 
                         <TextBlock Margin="10,0,0,0"
                                    VerticalAlignment="Center"

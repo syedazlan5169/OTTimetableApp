@@ -144,6 +144,16 @@ public class EmployeeManagerVM : INotifyPropertyChanged
         };
     }
 
+    public string BaseGroupDisplay
+    {
+        get
+        {
+            if (Edit.BaseGroupId == null) return "(Not assigned)";
+            var g = Groups.FirstOrDefault(x => x.Id == Edit.BaseGroupId);
+            return g?.Name ?? "(Unknown)";
+        }
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
