@@ -101,7 +101,6 @@
 
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Base Group:" VerticalAlignment="Center"/>
                     <DockPanel Grid.Row="10" Grid.Column="1">
-                        <TextBlock Grid.Row="10" Grid.Column="0" Text="Base Group:" VerticalAlignment="Center"/>
 
                         <TextBlock Grid.Row="10" Grid.Column="1"
                                    Text="{Binding Edit.BaseGroupDisplay}"

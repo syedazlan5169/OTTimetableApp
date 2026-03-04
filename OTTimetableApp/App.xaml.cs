@@ -41,6 +41,9 @@ public partial class App : Application
         services.AddSingleton<EmployeeService>();
         services.AddTransient<EmployeeManagerVM>();
         services.AddTransient<EmployeeManagerWindow>();
+        services.AddSingleton<GroupManagerService>();
+        services.AddTransient<GroupManagerVM>();
+        services.AddTransient<GroupManagerWindow>();
 
         Services = services.BuildServiceProvider();
 

@@ -20,6 +20,10 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<GroupMember>()
+            .HasIndex(x => x.EmployeeId)
+            .IsUnique();
+
         modelBuilder.Entity<Group>()
             .HasIndex(g => g.Name)
             .IsUnique();

@@ -101,7 +101,8 @@ public class CalendarGeneratorService2
                     .OrderBy(x => x.SlotIndex)
                     .ToList();
 
-                for (int slotIndex = 1; slotIndex <= 5; slotIndex++)
+                var cap = db.Groups.AsNoTracking().Where(g => g.Id == sh.GroupId).Select(g => g.SlotCapacity).First();
+                for (int slotIndex = 1; slotIndex <= cap; slotIndex++)
                 {
                     var plannedEmpId = gm.FirstOrDefault(x => x.SlotIndex == slotIndex)?.EmployeeId;
 

@@ -131,6 +131,16 @@ public partial class MainWindow : Window
         _vm.LoadMonth();
     }
 
+    private void ManageGroups_Click(object sender, RoutedEventArgs e)
+    {
+        var win = App.Services.GetRequiredService<GroupManagerWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+
+        // Group membership changes affect new calendars only, but also affect dropdown options in timetable
+        _vm.LoadMonth();
+    }
+
     private void DebugClaim_Click(object sender, RoutedEventArgs e)
     {
         try
