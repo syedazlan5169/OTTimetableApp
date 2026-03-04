@@ -22,7 +22,7 @@ public partial class GroupManagerWindow : Window
         try
         {
             _vm.SaveCapacity();
-            MessageBox.Show("Capacity updated.");
+            MessageBox.Show("Group updated.");
         }
         catch (Exception ex)
         {

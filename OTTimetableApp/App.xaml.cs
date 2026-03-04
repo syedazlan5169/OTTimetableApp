@@ -59,6 +59,8 @@ public partial class App : Application
         services.AddSingleton<GroupManagerService>();
         services.AddTransient<GroupManagerVM>();
         services.AddTransient<GroupManagerWindow>();
+        services.AddTransient<ClaimPreviewVM>();
+        services.AddTransient<ClaimPreviewWindow>();
 
         Services = services.BuildServiceProvider();
 

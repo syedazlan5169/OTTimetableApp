@@ -14,10 +14,13 @@ public partial class MainWindow : Window
     private readonly SlotUpdateService _slotSvc;
     private readonly PublicHolidayService _phSvc;
     private readonly OtCalculatorService _otSvc;
+    private readonly ClaimPreviewWindow _claimWin;
+    private readonly IServiceProvider _sp;
 
-    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc, PublicHolidayService phSvc, OtCalculatorService otSvc)
+    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc, PublicHolidayService phSvc, OtCalculatorService otSvc, ClaimPreviewWindow claimWin, IServiceProvider sp)
     {
         InitializeComponent();
+        _claimWin = claimWin;
         _vm = vm;
         _slotSvc = slotSvc;
         _phSvc = phSvc;
@@ -28,6 +31,13 @@ public partial class MainWindow : Window
         _vm.LoadCalendars();
         _vm.LoadMonth();
         _phSvc = phSvc;
+        _sp = sp;
+    }
+    private void CreateClaim_Click(object sender, RoutedEventArgs e)
+    {
+        var win = _sp.GetRequiredService<ClaimPreviewWindow>();
+        win.Owner = this;
+        win.ShowDialog();
     }
 
     private void Calendar_Changed(object sender, SelectionChangedEventArgs e)
