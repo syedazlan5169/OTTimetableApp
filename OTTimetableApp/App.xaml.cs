@@ -16,6 +16,21 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+
+        this.DispatcherUnhandledException += (s, ex) =>
+        {
+            MessageBox.Show(ex.Exception.ToString(), "Unhandled UI Exception");
+            ex.Handled = true;
+        };
+
+        AppDomain.CurrentDomain.UnhandledException += (s, ex) =>
+        {
+            MessageBox.Show(ex.ExceptionObject?.ToString() ?? "Unknown", "Unhandled AppDomain Exception");
+        };
+
+
+
+
         var cfg = AppConfig.Load();
         var cs = $"Server={cfg.Host};Database={cfg.Database};User={cfg.User};Password={cfg.Password};";
 

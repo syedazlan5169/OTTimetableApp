@@ -16,7 +16,9 @@ public partial class EmployeeManagerWindow : Window
         Loaded += (_, __) => _vm.Load();
     }
 
-    private void New_Click(object sender, RoutedEventArgs e)
+
+
+private void New_Click(object sender, RoutedEventArgs e)
     {
         _vm.NewEmployee();
     }
@@ -51,5 +53,11 @@ public partial class EmployeeManagerWindow : Window
         {
             MessageBox.Show(ex.Message, "Delete Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private void Salary_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is EmployeeManagerVM vm)
+            vm.RefreshComputed();
     }
 }

@@ -89,12 +89,14 @@ public class EmployeeManagerVM : INotifyPropertyChanged
         };
 
         OnPropertyChanged(nameof(BaseGroupDisplay));
+        RefreshComputed();
         SelectedEmployee = null;
     }
 
     public void Save()
     {
         _svc.Save(Edit);
+        RefreshComputed();
         ReloadAfterSave(Edit.Id);
     }
 
@@ -146,6 +148,7 @@ public class EmployeeManagerVM : INotifyPropertyChanged
         };
 
         OnPropertyChanged(nameof(BaseGroupDisplay));
+        RefreshComputed();
     }
 
     public string BaseGroupDisplay
@@ -156,6 +159,25 @@ public class EmployeeManagerVM : INotifyPropertyChanged
             var g = Groups.FirstOrDefault(x => x.Id == Edit.BaseGroupId);
             return g?.Name ?? "(Unknown)";
         }
+    }
+
+    public string HourlyRateDisplay
+    {
+        get
+        {
+            var sal = Edit?.Salary;
+            if (sal == null) return "";
+
+            var raw = sal.Value * 12m / 2504m;
+            var truncated = Math.Truncate(raw * 100m) / 100m;
+            return truncated.ToString("0.00");
+        }
+    }
+
+    public void RefreshComputed()
+    {
+        OnPropertyChanged(nameof(HourlyRateDisplay));
+        OnPropertyChanged(nameof(BaseGroupDisplay));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
