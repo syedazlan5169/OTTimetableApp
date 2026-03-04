@@ -101,16 +101,9 @@
 
                     <TextBlock Grid.Row="10" Grid.Column="0" Text="Base Group:" VerticalAlignment="Center"/>
                     <DockPanel Grid.Row="10" Grid.Column="1">
-
-                        <TextBlock Grid.Row="10" Grid.Column="1"
-                                   Text="{Binding Edit.BaseGroupDisplay}"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"/>
-
-                        <TextBlock Margin="10,0,0,0"
-                                   VerticalAlignment="Center"
-                                   Foreground="DimGray"
-                                   Text="{Binding Edit.BaseGroupId, StringFormat=BaseGroupId: {0}}"/>
+                        <TextBlock Text="{Binding BaseGroupDisplay}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
                     </DockPanel>
                 </Grid>
 

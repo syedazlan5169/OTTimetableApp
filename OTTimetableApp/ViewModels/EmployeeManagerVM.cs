@@ -87,6 +87,8 @@ public class EmployeeManagerVM : INotifyPropertyChanged
             IsActive = true,
             BaseGroupId = null
         };
+
+        OnPropertyChanged(nameof(BaseGroupDisplay));
         SelectedEmployee = null;
     }
 
@@ -142,6 +144,8 @@ public class EmployeeManagerVM : INotifyPropertyChanged
             BaseGroupId = src.BaseGroupId,
             IsActive = src.IsActive
         };
+
+        OnPropertyChanged(nameof(BaseGroupDisplay));
     }
 
     public string BaseGroupDisplay
