@@ -20,6 +20,10 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Employee>()
+            .Property(e => e.Salary)
+            .HasPrecision(10, 2);
+
         modelBuilder.Entity<GroupMember>()
             .HasIndex(x => x.EmployeeId)
             .IsUnique();
