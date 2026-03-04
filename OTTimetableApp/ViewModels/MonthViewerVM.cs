@@ -45,8 +45,20 @@ public partial class MonthViewerVM : ObservableObject
         foreach (var c in list)
             Calendars.Add(c);
 
+        // If selected calendar was deleted, reset selection safely
+        if (SelectedCalendarId != 0 && !Calendars.Any(x => x.Id == SelectedCalendarId))
+            SelectedCalendarId = 0;
+
+        // Auto-select first calendar if none selected
         if (SelectedCalendarId == 0 && Calendars.Count > 0)
             SelectedCalendarId = Calendars[0].Id;
+
+        // If still none, clear UI
+        if (SelectedCalendarId == 0)
+        {
+            MonthTitle = "";
+            Days.Clear();
+        }
     }
 
     public void LoadMonth()

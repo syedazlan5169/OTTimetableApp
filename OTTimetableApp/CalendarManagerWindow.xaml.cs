@@ -71,8 +71,26 @@ public partial class CalendarManagerWindow : Window
     {
         try
         {
+            if (CalendarGrid == null)
+            {
+                MessageBox.Show("Calendar grid is not ready (CalendarGrid is null).", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (CalendarGrid.SelectedItem == null)
+            {
+                MessageBox.Show("Select a calendar first.", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             if (CalendarGrid.SelectedItem is not Calendar cal)
-                throw new Exception("Select a calendar first.");
+            {
+                MessageBox.Show($"Unexpected selected item type: {CalendarGrid.SelectedItem.GetType().FullName}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             _genSvc.GenerateYear(cal.Id);
 
@@ -81,7 +99,7 @@ public partial class CalendarManagerWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

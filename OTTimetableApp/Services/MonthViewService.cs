@@ -33,7 +33,14 @@ public class MonthViewService
     {
         using var db = _dbFactory.CreateDbContext();
 
-        var cal = db.Calendars.AsNoTracking().First(c => c.Id == calendarId);
+        var cal = db.Calendars
+            .AsNoTracking()
+            .FirstOrDefault(c => c.Id == calendarId);
+
+        // Calendar deleted / not found → return empty payload safely
+        if (cal == null)
+            return ("", new List<DayRowVM>());
+
         var monthTitle = new DateTime(cal.Year, month, 1).ToString("MMMM yyyy");
 
         var rows = LoadMonthRows(db, calendarId, month, cal.Year);
