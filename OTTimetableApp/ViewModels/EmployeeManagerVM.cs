@@ -9,6 +9,7 @@ namespace OTTimetableApp.ViewModels;
 public class EmployeeManagerVM : INotifyPropertyChanged
 {
     private readonly EmployeeService _svc;
+    private Dictionary<int, int> _baseGroupMap = new();
 
     public ObservableCollection<Employee> Employees { get; } = new();
     public ObservableCollection<GroupOptionVM> Groups { get; } = new();
@@ -55,6 +56,7 @@ public class EmployeeManagerVM : INotifyPropertyChanged
             Groups.Add(new GroupOptionVM { Id = g.Id, Name = g.Name });
 
         _allEmployees = _svc.GetAll();
+        _baseGroupMap = _svc.GetBaseGroupMap();
         ApplyFilter();
 
         if (Employees.Count > 0 && SelectedEmployee == null)
@@ -85,7 +87,6 @@ public class EmployeeManagerVM : INotifyPropertyChanged
         Edit = new Employee
         {
             IsActive = true,
-            BaseGroupId = null
         };
 
         OnPropertyChanged(nameof(BaseGroupDisplay));
@@ -155,8 +156,12 @@ public class EmployeeManagerVM : INotifyPropertyChanged
     {
         get
         {
-            if (Edit.BaseGroupId == null) return "(Not assigned)";
-            var g = Groups.FirstOrDefault(x => x.Id == Edit.BaseGroupId);
+            if (Edit == null || Edit.Id == 0) return "";
+
+            if (!_baseGroupMap.TryGetValue(Edit.Id, out var gid))
+                return "(Not assigned)";
+
+            var g = Groups.FirstOrDefault(x => x.Id == gid);
             return g?.Name ?? "(Unknown)";
         }
     }

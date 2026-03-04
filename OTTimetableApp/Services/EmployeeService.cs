@@ -29,6 +29,16 @@ public class EmployeeService
         return db.Groups.AsNoTracking().OrderBy(g => g.Name).ToList();
     }
 
+    public Dictionary<int, int> GetBaseGroupMap()
+    {
+        using var db = _dbFactory.CreateDbContext();
+
+        return db.GroupMembers
+            .AsNoTracking()
+            .Where(gm => gm.EmployeeId != null)
+            .ToDictionary(gm => gm.EmployeeId!.Value, gm => gm.GroupId);
+    }
+
     public void Save(Employee e)
     {
         if (string.IsNullOrWhiteSpace(e.Name))
@@ -60,7 +70,6 @@ public class EmployeeService
             existing.BankAccountNo = e.BankAccountNo?.Trim();
             existing.BankName = e.BankName?.Trim();
 
-            existing.BaseGroupId = e.BaseGroupId;
             existing.IsActive = e.IsActive;
         }
 
@@ -76,4 +85,6 @@ public class EmployeeService
 
         db.SaveChanges();
     }
+
+
 }
