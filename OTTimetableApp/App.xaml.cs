@@ -5,12 +5,14 @@ using OTTimetableApp.Infrastructure;
 using OTTimetableApp.Services;
 using OTTimetableApp.ViewModels;
 using System.Windows;
+using System.Globalization;
 
 namespace OTTimetableApp;
 
 public partial class App : Application
 {
     public static IServiceProvider Services { get; private set; } = null!;
+
 
     protected override void OnStartup(StartupEventArgs e)
     {

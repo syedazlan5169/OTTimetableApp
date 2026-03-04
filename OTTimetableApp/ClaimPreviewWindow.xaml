@@ -7,6 +7,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Top controls -->
@@ -41,13 +42,14 @@
 
         <!-- Table -->
         <DataGrid Grid.Row="1"
+                  Margin="0,0,0,10"
                   ItemsSource="{Binding Lines}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   IsReadOnly="False">
             <DataGrid.Columns>
                 <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked}" Width="45"/>
-                <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="110"/>
+                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat={}{0:dd/MM/yyyy}}" Width="110"/>
                 <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="200"/>
                 <DataGridTextColumn Header="OT Shift" Binding="{Binding Shift}" Width="120"/>
 
@@ -58,5 +60,31 @@
                 <DataGridTextColumn Header="2.0"   Binding="{Binding H20, StringFormat=N2}"   Width="80"/>
             </DataGrid.Columns>
         </DataGrid>
+        <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,10,0,0">
+
+            <TextBlock Text="{Binding HourlyRate, StringFormat=Hourly Rate: RM {0:N2}}"
+               FontWeight="Bold"/>
+
+            <Grid Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding Total1125, StringFormat=1.125 Hours: {0:N2}}"/>
+                <TextBlock Grid.Column="1" Text="{Binding Total125, StringFormat=1.25 Hours: {0:N2}}"/>
+                <TextBlock Grid.Column="2" Text="{Binding Total15, StringFormat=1.5 Hours: {0:N2}}"/>
+                <TextBlock Grid.Column="3" Text="{Binding Total175, StringFormat=1.75 Hours: {0:N2}}"/>
+                <TextBlock Grid.Column="4" Text="{Binding Total20, StringFormat=2.0 Hours: {0:N2}}"/>
+            </Grid>
+
+            <TextBlock Margin="0,8,0,0"
+               FontSize="16"
+               FontWeight="Bold"
+               Text="{Binding GrandTotal, StringFormat=Total Claim: RM {0:N2}}"/>
+        </StackPanel>
     </Grid>
 </Window>
