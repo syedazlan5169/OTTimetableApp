@@ -90,7 +90,8 @@
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Gaji (RM):" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="6" Grid.Column="1" Height="26"
-                             Text="{Binding Edit.Salary, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True, NotifyOnValidationError=True}"
+                             Text="{Binding Edit.Salary, UpdateSourceTrigger=LostFocus, ValidatesOnExceptions=True, NotifyOnValidationError=True}"
+                             PreviewTextInput="Salary_PreviewTextInput"
                              LostFocus="Salary_LostFocus"/>
 
                     <TextBlock Grid.Row="7" Grid.Column="0" Text="Kadar Satu Jam:" VerticalAlignment="Center"/>

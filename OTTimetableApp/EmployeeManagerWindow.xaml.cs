@@ -1,22 +1,46 @@
-﻿using System.Windows;
-using OTTimetableApp.ViewModels;
+﻿using OTTimetableApp.ViewModels;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace OTTimetableApp;
 
 public partial class EmployeeManagerWindow : Window
 {
     private readonly EmployeeManagerVM _vm;
+    private static readonly Regex _decimalRegex = new Regex(@"^\d*\.?\d*$");
 
     public EmployeeManagerWindow(EmployeeManagerVM vm)
     {
         InitializeComponent();
+        DataObject.AddPastingHandler(this, OnPaste);
         _vm = vm;
         DataContext = _vm;
 
         Loaded += (_, __) => _vm.Load();
     }
 
+    private void OnPaste(object sender, DataObjectPastingEventArgs e)
+    {
+        if (!e.DataObject.GetDataPresent(typeof(string)))
+        {
+            e.CancelCommand();
+            return;
+        }
 
+        string text = (string)e.DataObject.GetData(typeof(string))!;
+        if (!_decimalRegex.IsMatch(text))
+            e.CancelCommand();
+    }
+
+    private void Salary_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+    {
+        if (sender is not TextBox tb) return;
+
+        string proposed = tb.Text.Insert(tb.SelectionStart, e.Text);
+
+        e.Handled = !_decimalRegex.IsMatch(proposed);
+    }
 
 private void New_Click(object sender, RoutedEventArgs e)
     {
