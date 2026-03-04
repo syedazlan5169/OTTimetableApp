@@ -59,6 +59,7 @@
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Id"
                                           SelectedValue="{Binding EmployeeId}"
+                                          DropDownOpened="SlotChanged_DropDownOpened"
                                           DropDownClosed="SlotChanged_DropDownClosed"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

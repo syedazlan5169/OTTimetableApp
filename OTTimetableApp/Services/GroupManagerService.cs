@@ -28,19 +28,34 @@ public class GroupManagerService
             .ToList();
     }
 
+    public List<Employee> GetEmployeesForGroup(int currentGroupId)
+    {
+        using var db = _dbFactory.CreateDbContext();
+
+        // Employees already assigned to OTHER groups
+        var takenIds = db.GroupMembers
+            .Where(gm => gm.GroupId != currentGroupId)
+            .Select(gm => gm.EmployeeId)
+            .ToList();
+
+        return db.Employees.AsNoTracking()
+            .Where(e => e.IsActive && !takenIds.Contains(e.Id))
+            .OrderBy(e => e.Name)
+            .ToList();
+    }
+
     public (Group group, List<GroupMember> members) LoadGroup(int groupId)
     {
         using var db = _dbFactory.CreateDbContext();
 
-        var g = db.Groups.First(x => x.Id == groupId);
+        var group = db.Groups
+            .First(g => g.Id == groupId);
 
         var members = db.GroupMembers
-            .AsNoTracking()
-            .Where(x => x.GroupId == groupId)
-            .OrderBy(x => x.SlotIndex)
+            .Where(m => m.GroupId == groupId)
             .ToList();
 
-        return (g, members);
+        return (group, members);
     }
 
     public void SaveCapacity(int groupId, int capacity)
@@ -82,7 +97,7 @@ public class GroupManagerService
         // Ensure this employee isn't already in another group (DB unique will enforce too)
         var already = db.GroupMembers.FirstOrDefault(x => x.EmployeeId == employeeId.Value);
         if (already != null && already.GroupId != groupId)
-            throw new InvalidOperationException("Employee is already assigned to another group.");
+            throw new InvalidOperationException("Employee already belongs to group '{existingGroupName}'.");
 
         if (existing == null)
         {

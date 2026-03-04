@@ -42,20 +42,18 @@ public class GroupManagerVM : INotifyPropertyChanged
         foreach (var g in _svc.GetGroups())
             Groups.Add(g);
 
-        Employees.Clear();
-        Employees.Add(new EmployeePickVM { Id = null, Name = "(Empty)" });
-        foreach (var e in _svc.GetEmployees())
-            Employees.Add(new EmployeePickVM { Id = e.Id, Name = e.Name });
-
         if (SelectedGroupId == 0 && Groups.Count > 0)
             SelectedGroupId = Groups[0].Id;
-        else
-            LoadSelectedGroup();
+
+        ReloadEmployeeDropdown();
+        LoadSelectedGroup();
     }
 
     private void LoadSelectedGroup()
     {
         if (SelectedGroupId == 0) return;
+
+        ReloadEmployeeDropdown();
 
         var (group, members) = _svc.LoadGroup(SelectedGroupId);
 
@@ -77,6 +75,17 @@ public class GroupManagerVM : INotifyPropertyChanged
         }
     }
 
+    private void ReloadEmployeeDropdown()
+    {
+        Employees.Clear();
+        Employees.Add(new EmployeePickVM { Id = null, Name = "(Empty)" });
+
+        if (SelectedGroupId == 0) return;
+
+        foreach (var e in _svc.GetEmployeesForGroup(SelectedGroupId))
+            Employees.Add(new EmployeePickVM { Id = e.Id, Name = e.Name });
+    }
+
     public void SaveCapacity()
     {
         _svc.SaveCapacity(SelectedGroupId, SlotCapacity);
@@ -93,6 +102,8 @@ public class GroupManagerVM : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
+
+
 
 public class EmployeePickVM
 {

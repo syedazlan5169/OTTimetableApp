@@ -30,12 +30,22 @@ public partial class GroupManagerWindow : Window
         }
     }
 
+    private void SlotChanged_DropDownOpened(object sender, EventArgs e)
+    {
+        if (sender is not ComboBox cb) return;
+
+        // store previous value so we can revert on error
+        cb.Tag = cb.SelectedValue;
+    }
+
     private void SlotChanged_DropDownClosed(object sender, EventArgs e)
     {
         if (sender is not ComboBox cb) return;
         if (cb.DataContext is not GroupSlotRowVM row) return;
 
-        int? selected = cb.SelectedValue as int?;
+        // SelectedValue may be boxed int or int?
+        int? selected = cb.SelectedValue is int i ? i : cb.SelectedValue as int?;
+        int? previous = cb.Tag is int pi ? pi : cb.Tag as int?;
 
         try
         {
@@ -43,10 +53,15 @@ public partial class GroupManagerWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(
+                ex.Message,
+                "Group Assignment Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning
+            );
 
-            // reload to revert UI back to DB state
-            _vm.Load();
+            // revert UI selection safely
+            cb.SelectedValue = previous;
         }
     }
 }
