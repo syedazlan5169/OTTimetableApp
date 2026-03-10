@@ -62,16 +62,20 @@ public class OtCalculatorService
             .OrderBy(d => d.Date)
             .ToList();
 
-        var emp = db.Employees.AsNoTracking().First(e => e.Id == employeeId);
         var dayByDate = days.ToDictionary(d => d.Date);
+        var baseGroupId = db.GroupMembers
+            .AsNoTracking()
+            .Where(gm => gm.EmployeeId == employeeId)
+            .Select(gm => (int?)gm.GroupId)
+            .FirstOrDefault();
 
-        if (emp.BaseGroupId == null)
-            throw new InvalidOperationException("Employee has no Base Group yet. Please assign Base Group before generating claim.");
+        if (baseGroupId == null)
+            throw new InvalidOperationException("Employee is not assigned to any group yet. Please assign the employee in Group Manager before generating claim.");
 
-        int baseGroupId = emp.BaseGroupId.Value;
+        int baseGroupIdValue = baseGroupId.Value;
 
         // 16.4: precompute PH Gantian dates for this employee
-        var phGantianDates = BuildPhGantianDates(days, baseGroupId);
+        var phGantianDates = BuildPhGantianDates(days, baseGroupIdValue);
 
         var monthDays = days.Where(d => d.Date >= start && d.Date <= end).ToList();
         var dayIds = monthDays.Select(d => d.Id).ToList();
@@ -101,9 +105,9 @@ public class OtCalculatorService
             var rowDay = dayById[sh.CalendarDayId]; // timetable row date
 
             // Own shift skip logic (but allow PH/PHG)
-            if (IsOwnShift(rowDay, baseGroupId, sh.ShiftType))
+            if (IsOwnShift(rowDay, baseGroupIdValue, sh.ShiftType))
             {
-                var catForDay = ResolveCategory(rowDay, baseGroupId, phGantianDates);
+                var catForDay = ResolveCategory(rowDay, baseGroupIdValue, phGantianDates);
                 if (catForDay != OtCategory.KelepasanAm && catForDay != OtCategory.KelepasanAmGantian)
                     continue;
             }
@@ -115,7 +119,7 @@ public class OtCalculatorService
                 if (!dayByDate.TryGetValue(seg.date, out var segDay))
                     continue;
 
-                var cat = ResolveCategory(segDay, baseGroupId, phGantianDates);
+                var cat = ResolveCategory(segDay, baseGroupIdValue, phGantianDates);
 
                 // Build DateTime interval
                 var startDt = ToDateTime(seg.date, seg.from);
@@ -129,7 +133,7 @@ public class OtCalculatorService
                 // and OT overlaps own shift, claim starts after own shift ends.
                 if (cat == OtCategory.WorkingDay)
                 {
-                    var own = GetOwnShiftInterval(segDay, baseGroupId);
+                    var own = GetOwnShiftInterval(segDay, baseGroupIdValue);
                     if (own != null)
                     {
                         var (ownStart, ownEnd) = own.Value;
