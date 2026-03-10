@@ -10,11 +10,11 @@ public partial class ClaimPreviewVM : ObservableObject
     private readonly MonthViewService _monthSvc;
     private readonly EmployeeService _empSvc;
     private readonly OtCalculatorService _otSvc;
-    public decimal Total1125 => Lines.Sum(x => x.H1125);
-    public decimal Total125 => Lines.Sum(x => x.H125);
-    public decimal Total15 => Lines.Sum(x => x.H15);
-    public decimal Total175 => Lines.Sum(x => x.H175);
-    public decimal Total20 => Lines.Sum(x => x.H20);
+    public decimal Total1125 => Lines.Sum(x => x.H1125 ?? 0);
+    public decimal Total125 => Lines.Sum(x => x.H125 ?? 0);
+    public decimal Total15 => Lines.Sum(x => x.H15 ?? 0);
+    public decimal Total175 => Lines.Sum(x => x.H175 ?? 0);
+    public decimal Total20 => Lines.Sum(x => x.H20 ?? 0);
     public decimal Claim1125 => Total1125 * 1.125m * HourlyRate;
     public decimal Claim125 => Total125 * 1.25m * HourlyRate;
     public decimal Claim15 => Total15 * 1.5m * HourlyRate;

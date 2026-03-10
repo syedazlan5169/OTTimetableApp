@@ -48,16 +48,17 @@
                   CanUserAddRows="False"
                   IsReadOnly="False">
             <DataGrid.Columns>
+
                 <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked}" Width="45"/>
                 <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat={}{0:dd/MM/yyyy}}" Width="110"/>
                 <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="200"/>
                 <DataGridTextColumn Header="OT Shift" Binding="{Binding Shift}" Width="120"/>
 
-                <DataGridTextColumn Header="1.125" Binding="{Binding H1125, StringFormat=N2}" Width="80"/>
-                <DataGridTextColumn Header="1.25"  Binding="{Binding H125, StringFormat=N2}"  Width="80"/>
-                <DataGridTextColumn Header="1.5"   Binding="{Binding H15, StringFormat=N2}"   Width="80"/>
-                <DataGridTextColumn Header="1.75"  Binding="{Binding H175, StringFormat=N2}"  Width="80"/>
-                <DataGridTextColumn Header="2.0"   Binding="{Binding H20, StringFormat=N2}"   Width="80"/>
+                <DataGridTextColumn Header="1.125" Binding="{Binding H1125, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
+                <DataGridTextColumn Header="1.25" Binding="{Binding H125, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
+                <DataGridTextColumn Header="1.5" Binding="{Binding H15, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
+                <DataGridTextColumn Header="1.75" Binding="{Binding H175, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
+                <DataGridTextColumn Header="2.0" Binding="{Binding H20, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,10,0,0">
