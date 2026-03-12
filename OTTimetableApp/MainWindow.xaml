@@ -9,8 +9,8 @@
         </Grid.RowDefinitions>
 
         <!-- Top bar -->
-        <DockPanel Margin="0,0,0,10">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+        <StackPanel Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Calendar:" VerticalAlignment="Center" Margin="0,0,6,0"/>
                 <ComboBox Width="220"
                           ItemsSource="{Binding Calendars}"
@@ -51,11 +51,11 @@
             </StackPanel>
 
             <TextBlock Text="{Binding MonthTitle}"
-                       FontSize="20"
+                       FontSize="26"
                        FontWeight="Bold"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center"/>
-        </DockPanel>
+                       Margin="0,10,0,0"/>
+        </StackPanel>
 
         <!-- Timetable grid (month only) -->
         <DataGrid Grid.Row="1"
