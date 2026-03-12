@@ -27,4 +27,11 @@ public class OtClaimLine
     public decimal Rate { get; set; }               // 1.125, 1.25, etc
 
     public string Notes { get; set; } = "";         // optional debug/audit
+
+    // UI-only: identify which original timetable shift this line came from.
+    // This enables claim preview grouping/merging back into a single row per shift assignment.
+    public int UiShiftAssignmentId { get; set; }
+    public DateOnly UiShiftDate { get; set; }        // timetable row date (clock-out date for night shift)
+    public TimeOnly UiShiftFrom { get; set; }
+    public TimeOnly UiShiftTo { get; set; }
 }

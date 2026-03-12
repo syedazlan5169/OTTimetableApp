@@ -11,6 +11,40 @@ public class OtCalculatorService
     private static DateTime ToDateTime(DateOnly d, TimeOnly t)
     => d.ToDateTime(t);
 
+    private static IEnumerable<(DateTime start, DateTime end)> SubtractInterval(
+        DateTime start,
+        DateTime end,
+        DateTime cutStart,
+        DateTime cutEnd)
+    {
+        // no overlap
+        if (end <= cutStart || start >= cutEnd)
+        {
+            yield return (start, end);
+            yield break;
+        }
+
+        // fully covered
+        if (start >= cutStart && end <= cutEnd)
+            yield break;
+
+        // left piece
+        if (start < cutStart)
+        {
+            var leftEnd = end < cutStart ? end : cutStart;
+            if (leftEnd > start)
+                yield return (start, leftEnd);
+        }
+
+        // right piece
+        if (end > cutEnd)
+        {
+            var rightStart = start > cutEnd ? start : cutEnd;
+            if (end > rightStart)
+                yield return (rightStart, end);
+        }
+    }
+
     private static (DateTime start, DateTime end)? GetOwnShiftInterval(CalendarDay day, int baseGroupId)
     {
         // if base group OFF => no own shift
@@ -104,6 +138,8 @@ public class OtCalculatorService
             var sh = shiftById[sl.ShiftAssignmentId];
             var rowDay = dayById[sh.CalendarDayId]; // timetable row date
 
+            var (uiShiftFrom, uiShiftTo, _) = GetShiftTime(sh.ShiftType);
+
             // Own shift skip logic (but allow PH/PHG)
             if (IsOwnShift(rowDay, baseGroupIdValue, sh.ShiftType))
             {
@@ -130,19 +166,32 @@ public class OtCalculatorService
                     endDt = ToDateTime(seg.date.AddDays(1), new TimeOnly(0, 0));
 
                 // WorkingDay overlap rule: if employee has own shift SAME DATE,
-                // and OT overlaps own shift, claim starts after own shift ends.
+                // and OT overlaps own shift, subtract own-shift time so it won't be double-claimed.
                 if (cat == OtCategory.WorkingDay)
                 {
                     var own = GetOwnShiftInterval(segDay, baseGroupIdValue);
                     if (own != null)
                     {
                         var (ownStart, ownEnd) = own.Value;
-                        // overlap
-                        if (startDt < ownEnd && endDt > ownStart)
+
+                        foreach (var (pStart, pEnd) in SubtractInterval(startDt, endDt, ownStart, ownEnd))
                         {
-                            // claim only after own shift end
-                            startDt = (startDt < ownEnd) ? ownEnd : startDt;
+                            if (pEnd > pStart)
+                            {
+                                raw.Add(new RawSeg
+                                {
+                                    Start = pStart,
+                                    End = pEnd,
+                                    Category = cat,
+                                    UiShiftAssignmentId = sh.Id,
+                                    UiShiftDate = rowDay.Date,
+                                    UiShiftFrom = uiShiftFrom,
+                                    UiShiftTo = uiShiftTo
+                                });
+                            }
                         }
+
+                        continue;
                     }
                 }
 
@@ -152,7 +201,11 @@ public class OtCalculatorService
                     {
                         Start = startDt,
                         End = endDt,
-                        Category = cat
+                        Category = cat,
+                        UiShiftAssignmentId = sh.Id,
+                        UiShiftDate = rowDay.Date,
+                        UiShiftFrom = uiShiftFrom,
+                        UiShiftTo = uiShiftTo
                     });
                 }
             }
@@ -192,21 +245,67 @@ public class OtCalculatorService
         {
             if (result.Count == 0)
             {
-                result.Add(new RawSeg { Start = s.Start, End = s.End, Category = s.Category });
+                result.Add(new RawSeg
+                {
+                    Start = s.Start,
+                    End = s.End,
+                    Category = s.Category,
+                    UiShiftAssignmentId = s.UiShiftAssignmentId,
+                    UiShiftDate = s.UiShiftDate,
+                    UiShiftFrom = s.UiShiftFrom,
+                    UiShiftTo = s.UiShiftTo
+                });
                 continue;
             }
 
             var last = result[^1];
 
-            // Merge if overlap/adjacent AND same category (category affects rates)
-            if (s.Start <= last.End && s.Category == last.Category)
+            // Case 1: same original shift assignment + same category => we can merge safely
+            if (s.Start <= last.End && s.Category == last.Category && s.UiShiftAssignmentId == last.UiShiftAssignmentId)
             {
                 if (s.End > last.End) last.End = s.End;
+                continue;
             }
-            else
+
+            // Case 2: different shift assignment (or different category)
+            // Prevent double-claiming overlapping time (e.g. 07:00-15:00 and 14:00-23:00).
+            // Keep the earlier segment as-is, and trim the later segment to start at last.End.
+            var trimmedStart = s.Start;
+            var trimmedUiFrom = s.UiShiftFrom;
+
+            if (trimmedStart < last.End)
             {
-                result.Add(new RawSeg { Start = s.Start, End = s.End, Category = s.Category });
+                trimmedStart = last.End;
+                trimmedUiFrom = TimeOnly.FromDateTime(trimmedStart);
             }
+
+            if (s.End <= trimmedStart)
+                continue;
+
+            result.Add(new RawSeg
+            {
+                Start = trimmedStart,
+                End = s.End,
+                Category = s.Category,
+                UiShiftAssignmentId = s.UiShiftAssignmentId,
+                UiShiftDate = s.UiShiftDate,
+                UiShiftFrom = trimmedUiFrom,
+                UiShiftTo = s.UiShiftTo
+            });
+        }
+
+        // Normalize UI shift window per shift assignment after trimming/merging.
+        var boundsByShift = result
+            .GroupBy(x => x.UiShiftAssignmentId)
+            .ToDictionary(
+                g => g.Key,
+                g => (Start: g.Min(x => x.Start), End: g.Max(x => x.End)));
+
+        foreach (var seg in result)
+        {
+            var b = boundsByShift[seg.UiShiftAssignmentId];
+            seg.UiShiftFrom = TimeOnly.FromDateTime(b.Start);
+            seg.UiShiftTo = TimeOnly.FromDateTime(b.End);
         }
 
         return result;
@@ -270,7 +369,11 @@ public class OtCalculatorService
                         Start = cur,
                         End = segEnd,
                         Category = r.Category,
-                        Band = band
+                        Band = band,
+                        UiShiftAssignmentId = r.UiShiftAssignmentId,
+                        UiShiftDate = r.UiShiftDate,
+                        UiShiftFrom = r.UiShiftFrom,
+                        UiShiftTo = r.UiShiftTo
                     });
                 }
 
@@ -332,7 +435,11 @@ public class OtCalculatorService
                         Start = s.Start,
                         End = d.start,
                         Category = s.Category,
-                        Band = s.Band
+                        Band = s.Band,
+                        UiShiftAssignmentId = s.UiShiftAssignmentId,
+                        UiShiftDate = s.UiShiftDate,
+                        UiShiftFrom = s.UiShiftFrom,
+                        UiShiftTo = s.UiShiftTo
                     });
                 }
 
@@ -344,7 +451,11 @@ public class OtCalculatorService
                         Start = d.end,
                         End = s.End,
                         Category = s.Category,
-                        Band = s.Band
+                        Band = s.Band,
+                        UiShiftAssignmentId = s.UiShiftAssignmentId,
+                        UiShiftDate = s.UiShiftDate,
+                        UiShiftFrom = s.UiShiftFrom,
+                        UiShiftTo = s.UiShiftTo
                     });
                 }
             }
@@ -357,28 +468,52 @@ public class OtCalculatorService
 
     private static List<OtClaimLine> ToClaimLines(List<OtSeg> segs)
     {
-        return segs
-            .Where(s => s.End > s.Start)
-            .Select(s =>
+        static OtClaimLine MakeLine(OtSeg s, DateTime start, DateTime end)
+        {
+            var claimDate = DateOnly.FromDateTime(start);
+            var from = TimeOnly.FromDateTime(start);
+            var to = TimeOnly.FromDateTime(end);
+
+            var hours = (decimal)(end - start).TotalHours;
+            var rate = OtRateTable.GetRate(s.Category, s.Band);
+
+            return new OtClaimLine
             {
-                var claimDate = DateOnly.FromDateTime(s.Start);
-                var from = TimeOnly.FromDateTime(s.Start);
-                var to = TimeOnly.FromDateTime(s.End);
+                ClaimDate = claimDate,
+                From = from,
+                To = to,
+                Category = s.Category,
+                Band = s.Band,
+                Hours = hours,
+                Rate = rate,
+                UiShiftAssignmentId = s.UiShiftAssignmentId,
+                UiShiftDate = s.UiShiftDate,
+                UiShiftFrom = s.UiShiftFrom,
+                UiShiftTo = s.UiShiftTo
+            };
+        }
 
-                var hours = (decimal)(s.End - s.Start).TotalHours;
-                var rate = OtRateTable.GetRate(s.Category, s.Band);
+        var lines = new List<OtClaimLine>();
 
-                return new OtClaimLine
-                {
-                    ClaimDate = claimDate,
-                    From = from,
-                    To = to,
-                    Category = s.Category,
-                    Band = s.Band,
-                    Hours = hours,
-                    Rate = rate
-                };
-            })
+        foreach (var s in segs.Where(s => s.End > s.Start))
+        {
+            var cur = s.Start;
+            var end = s.End;
+
+            // Ensure claim lines never cross midnight so ClaimDate and night-shift presentation stay correct.
+            while (cur.Date < end.Date)
+            {
+                var midnight = cur.Date.AddDays(1);
+                if (midnight > cur)
+                    lines.Add(MakeLine(s, cur, midnight));
+                cur = midnight;
+            }
+
+            if (end > cur)
+                lines.Add(MakeLine(s, cur, end));
+        }
+
+        return lines
             .OrderBy(x => x.ClaimDate)
             .ThenBy(x => x.From)
             .ToList();
@@ -578,6 +713,11 @@ public class OtCalculatorService
         public DateTime End { get; set; }          // End > Start
         public OtCategory Category { get; set; }
         public RateBand Band { get; set; }         // after split
+
+        public int UiShiftAssignmentId { get; set; }
+        public DateOnly UiShiftDate { get; set; }
+        public TimeOnly UiShiftFrom { get; set; }
+        public TimeOnly UiShiftTo { get; set; }
     }
 
     private sealed class RawSeg
@@ -585,5 +725,10 @@ public class OtCalculatorService
         public DateTime Start { get; set; }
         public DateTime End { get; set; }          // End > Start
         public OtCategory Category { get; set; }
+
+        public int UiShiftAssignmentId { get; set; }
+        public DateOnly UiShiftDate { get; set; }
+        public TimeOnly UiShiftFrom { get; set; }
+        public TimeOnly UiShiftTo { get; set; }
     }
 }

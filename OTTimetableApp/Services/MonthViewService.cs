@@ -29,6 +29,21 @@ public class MonthViewService
             .ToList();
     }
 
+    public string GetWorkingShiftLabel(int calendarId, int baseGroupId, DateOnly date)
+    {
+        using var db = _dbFactory.CreateDbContext();
+
+        var day = db.CalendarDays
+            .AsNoTracking()
+            .First(d => d.CalendarId == calendarId && d.Date == date);
+
+        if (day.MorningGroupId == baseGroupId) return "07:00-15:00";
+        if (day.EveningGroupId == baseGroupId) return "14:00-23:00";
+        if (day.NightGroupId == baseGroupId) return "22:00-07:00";
+
+        return "OFF";
+    }
+
     public (string MonthTitle, List<DayRowVM> Rows) LoadMonth(int calendarId, int month)
     {
         using var db = _dbFactory.CreateDbContext();

@@ -156,47 +156,129 @@ public partial class ClaimPreviewVM : ObservableObject
 
         var claimLines = _otSvc.BuildMonthlyClaim(SelectedCalendarId, SelectedEmployeeId, SelectedMonth);
 
-        // Convert OtClaimLine -> ClaimLineVM with rate buckets
-        foreach (var l in claimLines)
-        {
-            var hours = l.Hours;
-            var rate = l.Rate;
+        var baseGroupMap = _empSvc.GetBaseGroupMap();
+        if (!baseGroupMap.TryGetValue(SelectedEmployeeId, out var baseGroupId))
+            throw new InvalidOperationException("Employee is not assigned to any group yet. Please assign the employee in Group Manager before generating claim.");
 
-            var shift = $"{l.From:HH:mm}-{l.To:HH:mm}";
-            var cat = CategoryToDisplay(l.Category);
+        var workingShiftLabelCache = new Dictionary<DateOnly, string>();
+        string GetWorkingShiftLabel(DateOnly date)
+        {
+            if (workingShiftLabelCache.TryGetValue(date, out var label))
+                return label;
+
+            label = _monthSvc.GetWorkingShiftLabel(SelectedCalendarId, baseGroupId, date);
+            workingShiftLabelCache[date] = label;
+            return label;
+        }
+
+        // Merge presentation ONLY within an original shift assignment.
+        // (Still keep different categories separate to avoid misleading Category display.)
+        var grouped = claimLines
+            .GroupBy(l => new { l.UiShiftAssignmentId, l.Category })
+            .OrderBy(g => g.First().UiShiftDate)
+            .ThenBy(g => g.First().UiShiftFrom);
+
+        var output = new List<(DateOnly Date, TimeOnly From, ClaimLineVM Vm)>();
+
+        ClaimLineVM BuildVm(DateOnly date, OtCategory category, string shift, IEnumerable<OtClaimLine> lines)
+        {
+            var categoryDisplay = category == OtCategory.WorkingDay
+                ? GetWorkingShiftLabel(date)
+                : CategoryToDisplay(category);
 
             var vm = new ClaimLineVM
             {
                 IsChecked = true,
-                Date = l.ClaimDate,
-                Category = cat,
-                Shift = shift
+                Date = date,
+                Category = categoryDisplay,
+                Shift = shift,
+
+                H1125 = lines.Where(x => x.Rate == 1.125m).Sum(x => x.Hours),
+                H125 = lines.Where(x => x.Rate == 1.25m).Sum(x => x.Hours),
+                H15 = lines.Where(x => x.Rate == 1.5m).Sum(x => x.Hours),
+                H175 = lines.Where(x => x.Rate == 1.75m).Sum(x => x.Hours),
+                H20 = lines.Where(x => x.Rate == 2.0m).Sum(x => x.Hours)
             };
 
-            // Put hours into correct rate column
-            if (rate == 1.125m) vm.H1125 = hours;
-            else if (rate == 1.25m) vm.H125 = hours;
-            else if (rate == 1.5m) vm.H15 = hours;
-            else if (rate == 1.75m) vm.H175 = hours;
-            else if (rate == 2.0m) vm.H20 = hours;
+            if (vm.H1125 == 0) vm.H1125 = null;
+            if (vm.H125 == 0) vm.H125 = null;
+            if (vm.H15 == 0) vm.H15 = null;
+            if (vm.H175 == 0) vm.H175 = null;
+            if (vm.H20 == 0) vm.H20 = null;
 
-            Lines.Add(vm);
+            return vm;
         }
 
-        OnPropertyChanged(nameof(Total1125));
-        OnPropertyChanged(nameof(Total125));
-        OnPropertyChanged(nameof(Total15));
-        OnPropertyChanged(nameof(Total175));
-        OnPropertyChanged(nameof(Total20));
+        foreach (var g in grouped)
+        {
+            var first = g.First();
 
-        OnPropertyChanged(nameof(Claim1125));
-        OnPropertyChanged(nameof(Claim125));
-        OnPropertyChanged(nameof(Claim15));
-        OnPropertyChanged(nameof(Claim175));
-        OnPropertyChanged(nameof(Claim20));
+            // Special presentation rule for night shift: show it split per calendar date
+            // (22:00-00:00 on previous day, 00:00-07:00 on shift date)
+            bool crossesMidnight = first.UiShiftFrom > first.UiShiftTo;
 
-        OnPropertyChanged(nameof(GrandTotal));
-        OnPropertyChanged(nameof(HourlyRate));
+            if (!crossesMidnight)
+            {
+                output.Add((
+                    Date: first.UiShiftDate,
+                    From: first.UiShiftFrom,
+                    Vm: BuildVm(
+                        date: first.UiShiftDate,
+                        category: first.Category,
+                        shift: $"{first.UiShiftFrom:HH:mm}-{first.UiShiftTo:HH:mm}",
+                        lines: g)));
+
+                continue;
+            }
+
+            var shiftDate = first.UiShiftDate;
+            var prevDate = shiftDate.AddDays(-1);
+
+            var byClaimDate = g
+                .GroupBy(x => x.ClaimDate)
+                .OrderBy(x => x.Key);
+
+            foreach (var dg in byClaimDate)
+            {
+                var date = dg.Key;
+
+                TimeOnly from;
+                TimeOnly to;
+
+                if (date == prevDate)
+                {
+                    from = first.UiShiftFrom;
+                    to = new TimeOnly(0, 0);
+                }
+                else if (date == shiftDate)
+                {
+                    from = new TimeOnly(0, 0);
+                    to = first.UiShiftTo;
+                }
+                else
+                {
+                    // fallback (shouldn't normally happen)
+                    from = dg.Min(x => x.From);
+                    to = dg.Max(x => x.To);
+                }
+
+                output.Add((
+                    Date: date,
+                    From: from,
+                    Vm: BuildVm(
+                        date: date,
+                        category: first.Category,
+                        shift: $"{from:HH:mm}-{to:HH:mm}",
+                        lines: dg)));
+            }
+        }
+
+        foreach (var item in output
+            .OrderBy(x => x.Date)
+            .ThenBy(x => x.From))
+        {
+            Lines.Add(item.Vm);
+        }
 
         AllChecked = true;
         AttachLineHandlers();
