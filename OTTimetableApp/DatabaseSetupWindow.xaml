@@ -1,0 +1,49 @@
+<Window x:Class="OTTimetableApp.DatabaseSetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Database Setup" Height="360" Width="640"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="14"
+                   Text="Set database connection and run migrations." Margin="0,0,0,10"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Text="Host:"/>
+        <TextBox x:Name="HostBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,6"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Text="Database:"/>
+        <TextBox x:Name="DatabaseBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,6"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Text="User:"/>
+        <TextBox x:Name="UserBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,6"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Text="Password:"/>
+        <PasswordBox x:Name="PasswordBox" Grid.Row="4" Grid.Column="1" Margin="0,0,0,6"/>
+
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="0,6,0,0">
+            <TextBlock Text="Status:" FontWeight="Bold"/>
+            <TextBox x:Name="StatusBox" Height="120" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+            <TextBlock x:Name="ConfigPathText" Margin="0,6,0,0" FontStyle="Italic" Foreground="Gray"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="Test" Width="90" Margin="0,0,10,0" Click="Test_Click"/>
+            <Button Content="Migrate" Width="90" Margin="0,0,10,0" Click="Migrate_Click"/>
+            <Button Content="Save" Width="90" Margin="0,0,10,0" Click="Save_Click"/>
+            <Button Content="Close" Width="90" Click="Close_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

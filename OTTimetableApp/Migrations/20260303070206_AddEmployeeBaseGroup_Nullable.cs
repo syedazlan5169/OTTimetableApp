@@ -10,27 +10,40 @@ namespace OTTimetableApp.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.AddColumn<int>(
                 name: "BaseGroupId",
                 table: "Employees",
                 type: "int",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "int");
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_BaseGroupId",
+                table: "Employees",
+                column: "BaseGroupId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Employees_Groups_BaseGroupId",
+                table: "Employees",
+                column: "BaseGroupId",
+                principalTable: "Groups",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.DropForeignKey(
+                name: "FK_Employees_Groups_BaseGroupId",
+                table: "Employees");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Employees_BaseGroupId",
+                table: "Employees");
+
+            migrationBuilder.DropColumn(
                 name: "BaseGroupId",
-                table: "Employees",
-                type: "int",
-                nullable: false,
-                defaultValue: 0,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldNullable: true);
+                table: "Employees");
         }
     }
 }

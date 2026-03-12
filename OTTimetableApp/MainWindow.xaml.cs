@@ -40,6 +40,16 @@ public partial class MainWindow : Window
         win.ShowDialog();
     }
 
+    private void DatabaseSetup_Click(object sender, RoutedEventArgs e)
+    {
+        var win = _sp.GetRequiredService<DatabaseSetupWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+
+        if (win.Saved)
+            MessageBox.Show("Database settings saved. Please restart the app to use the new connection.");
+    }
+
     private void Calendar_Changed(object sender, SelectionChangedEventArgs e)
     {
         _vm.LoadMonth();
