@@ -58,7 +58,7 @@ public partial class ClaimPreviewVM : ObservableObject
     public ObservableCollection<ClaimLineVM> Lines { get; } = new();
 
     [ObservableProperty] private int selectedCalendarId;
-    [ObservableProperty] private int selectedMonth = 1;
+    [ObservableProperty] private int selectedMonth;
     [ObservableProperty] private int selectedEmployeeId;
 
     public ClaimPreviewVM(MonthViewService monthSvc, EmployeeService empSvc, OtCalculatorService otSvc)
@@ -66,6 +66,9 @@ public partial class ClaimPreviewVM : ObservableObject
         _monthSvc = monthSvc;
         _empSvc = empSvc;
         _otSvc = otSvc;
+
+        // Auto-select current month when window opens
+        SelectedMonth = DateTime.Today.Month;
     }
 
     private void RefreshTotals()

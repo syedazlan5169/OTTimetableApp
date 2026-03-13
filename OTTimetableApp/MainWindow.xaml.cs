@@ -32,6 +32,14 @@ public partial class MainWindow : Window
         _vm.LoadMonth();
         _phSvc = phSvc;
         _sp = sp;
+
+        // Scroll to today's date after initial load
+        Loaded += MainWindow_Loaded;
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        ScrollToToday();
     }
     private void CreateClaim_Click(object sender, RoutedEventArgs e)
     {
@@ -197,6 +205,15 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ScrollToToday()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var todayRow = _vm.Days.FirstOrDefault(d => d.Date == today);
 
-
+        if (todayRow != null)
+        {
+            TimetableGrid.ScrollIntoView(todayRow);
+            TimetableGrid.SelectedItem = todayRow;
+        }
+    }
 }

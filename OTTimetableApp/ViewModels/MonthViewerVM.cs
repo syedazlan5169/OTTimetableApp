@@ -21,6 +21,9 @@ public partial class MonthViewerVM : ObservableObject
                 })
                 .ToList()
         );
+
+        // Auto-select current month when app starts
+        SelectedMonth = DateTime.Today.Month;
     }
 
     public ObservableCollection<CalendarOptionVM> Calendars { get; } = new();
@@ -30,7 +33,7 @@ public partial class MonthViewerVM : ObservableObject
     private int selectedCalendarId;
 
     [ObservableProperty]
-    private int selectedMonth = 1;
+    private int selectedMonth;
 
     [ObservableProperty]
     private string monthTitle = "";

@@ -58,7 +58,8 @@
         </StackPanel>
 
         <!-- Timetable grid (month only) -->
-        <DataGrid Grid.Row="1"
+        <DataGrid x:Name="TimetableGrid"
+                  Grid.Row="1"
                   ItemsSource="{Binding Days}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
