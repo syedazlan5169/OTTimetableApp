@@ -45,25 +45,42 @@ public class OtCalculatorService
         }
     }
 
-    private static (DateTime start, DateTime end)? GetOwnShiftInterval(CalendarDay day, int baseGroupId)
+    private static List<(DateTime start, DateTime end)> GetOwnShiftIntervals(
+        CalendarDay day, 
+        int baseGroupId,
+        Dictionary<DateOnly, CalendarDay> dayByDate)
     {
-        // if base group OFF => no own shift
-        if (day.OffGroupId == baseGroupId) return null;
+        var intervals = new List<(DateTime start, DateTime end)>();
 
-        // Determine which shift base group is assigned to
+        // if base group OFF => no own shift
+        if (day.OffGroupId == baseGroupId)
+            return intervals;
+
+        // Determine which shift base group is assigned to on this date
         if (day.MorningGroupId == baseGroupId)
-            return (ToDateTime(day.Date, new TimeOnly(7, 0)), ToDateTime(day.Date, new TimeOnly(15, 0)));
+            intervals.Add((ToDateTime(day.Date, new TimeOnly(7, 0)), ToDateTime(day.Date, new TimeOnly(15, 0))));
 
         if (day.EveningGroupId == baseGroupId)
-            return (ToDateTime(day.Date, new TimeOnly(14, 0)), ToDateTime(day.Date, new TimeOnly(23, 0)));
+            intervals.Add((ToDateTime(day.Date, new TimeOnly(14, 0)), ToDateTime(day.Date, new TimeOnly(23, 0))));
 
         if (day.NightGroupId == baseGroupId)
         {
             // remember: night shift for row date means 22:00 previous day -> 07:00 on this day
-            return (ToDateTime(day.Date.AddDays(-1), new TimeOnly(22, 0)), ToDateTime(day.Date, new TimeOnly(7, 0)));
+            intervals.Add((ToDateTime(day.Date.AddDays(-1), new TimeOnly(22, 0)), ToDateTime(day.Date, new TimeOnly(7, 0))));
         }
 
-        return null;
+        // IMPORTANT: Also check if next day has a night shift, which would START at 22:00 on current date
+        var nextDate = day.Date.AddDays(1);
+        if (dayByDate.TryGetValue(nextDate, out var nextDay))
+        {
+            if (nextDay.NightGroupId == baseGroupId)
+            {
+                // Night shift on next day's row means it starts 22:00 TODAY and ends 07:00 TOMORROW
+                intervals.Add((ToDateTime(day.Date, new TimeOnly(22, 0)), ToDateTime(nextDate, new TimeOnly(7, 0))));
+            }
+        }
+
+        return intervals;
     }
 
     private static bool IsBaseGroupOffOnDate(CalendarDay d, int baseGroupId)
@@ -169,12 +186,26 @@ public class OtCalculatorService
                 // and OT overlaps own shift, subtract own-shift time so it won't be double-claimed.
                 if (cat == OtCategory.WorkingDay)
                 {
-                    var own = GetOwnShiftInterval(segDay, baseGroupIdValue);
-                    if (own != null)
+                    var ownIntervals = GetOwnShiftIntervals(segDay, baseGroupIdValue, dayByDate);
+                    if (ownIntervals.Count > 0)
                     {
-                        var (ownStart, ownEnd) = own.Value;
+                        // Start with the OT interval and subtract each own shift interval
+                        var remainingIntervals = new List<(DateTime start, DateTime end)> { (startDt, endDt) };
 
-                        foreach (var (pStart, pEnd) in SubtractInterval(startDt, endDt, ownStart, ownEnd))
+                        foreach (var (ownStart, ownEnd) in ownIntervals)
+                        {
+                            var nextRemaining = new List<(DateTime start, DateTime end)>();
+
+                            foreach (var (rStart, rEnd) in remainingIntervals)
+                            {
+                                nextRemaining.AddRange(SubtractInterval(rStart, rEnd, ownStart, ownEnd));
+                            }
+
+                            remainingIntervals = nextRemaining;
+                        }
+
+                        // Add all remaining intervals as raw segments
+                        foreach (var (pStart, pEnd) in remainingIntervals)
                         {
                             if (pEnd > pStart)
                             {
