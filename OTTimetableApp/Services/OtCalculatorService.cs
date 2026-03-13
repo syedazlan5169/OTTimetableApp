@@ -96,7 +96,7 @@ public class OtCalculatorService
         _dbFactory = dbFactory;
     }
 
-    public List<OtClaimLine> BuildMonthlyClaim(int calendarId, int employeeId, int month)
+    public MonthlyClaimResult BuildMonthlyClaim(int calendarId, int employeeId, int month)
     {
         using var db = _dbFactory.CreateDbContext();
 
@@ -264,9 +264,52 @@ public class OtCalculatorService
         var outLines = ToClaimLines(finalSegs);
 
         // 6) month filter (optional; depends your payroll practice)
-        return outLines
+        var filteredLines = outLines
             .Where(l => l.ClaimDate >= start && l.ClaimDate <= end)
             .ToList();
+
+        // 7) Calculate Lebihan Jam Bertugas (Excess Working Hours)
+        var totalWorkingHours = CalculateTotalWorkingHours(db, calendarId, baseGroupIdValue, start, end);
+        const decimal thresholdHours = 180m;
+        var excessHours = Math.Max(0, totalWorkingHours - thresholdHours);
+        var excessAmount = excessHours * 1.25m;
+
+        return new MonthlyClaimResult
+        {
+            ClaimLines = filteredLines,
+            ExcessWorkingHours = excessHours,
+            ExcessWorkingHoursAmount = excessAmount
+        };
+    }
+
+    private static decimal CalculateTotalWorkingHours(
+        AppDbContext db,
+        int calendarId,
+        int groupId,
+        DateOnly start,
+        DateOnly end)
+    {
+        var days = db.CalendarDays
+            .AsNoTracking()
+            .Where(d => d.CalendarId == calendarId && d.Date >= start && d.Date <= end)
+            .ToList();
+
+        decimal totalHours = 0m;
+
+        foreach (var day in days)
+        {
+            // Count shift hours for this group
+            if (day.MorningGroupId == groupId)
+                totalHours += 8m; // Morning: 07:00-15:00 = 8 hours
+
+            if (day.EveningGroupId == groupId)
+                totalHours += 9m; // Evening: 14:00-23:00 = 9 hours
+
+            if (day.NightGroupId == groupId)
+                totalHours += 9m; // Night: 22:00-07:00 = 9 hours
+        }
+
+        return totalHours;
     }
 
     private static List<RawSeg> MergeOverlaps(List<RawSeg> input)

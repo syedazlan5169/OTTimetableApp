@@ -119,6 +119,10 @@
             </Grid>
 
             <TextBlock Margin="0,8,0,0"
+               FontWeight="Bold"
+               Text="{Binding ExcessWorkingHours, StringFormat=Lebihan Jam Bertugas: {0:N2} hours}"/>
+
+            <TextBlock Margin="0,8,0,0"
                FontSize="16"
                FontWeight="Bold"
                Text="{Binding GrandTotal, StringFormat=Total Claim: RM {0:N2}}"/>

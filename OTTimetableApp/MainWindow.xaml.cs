@@ -189,14 +189,15 @@ public partial class MainWindow : Window
                 return;
             }
 
-            var lines = _otSvc.BuildMonthlyClaim(_vm.SelectedCalendarId, emp.Id, _vm.SelectedMonth);
+            var claimResult = _otSvc.BuildMonthlyClaim(_vm.SelectedCalendarId, emp.Id, _vm.SelectedMonth);
+            var lines = claimResult.ClaimLines;
 
             var totalHours = lines.Sum(x => x.Hours);
             var preview = string.Join("\n", lines.Take(8).Select(l =>
                 $"{l.ClaimDate:dd/MM/yyyy} {l.From:HH\\:mm}-{l.To:HH\\:mm} {l.Band} {l.Category} {l.Hours}h"));
 
             MessageBox.Show(
-                $"Employee: {emp.Name}\nLines: {lines.Count}\nTotal Hours: {totalHours}\n\nFirst lines:\n{preview}",
+                $"Employee: {emp.Name}\nLines: {lines.Count}\nTotal Hours: {totalHours}\nExcess Hours: {claimResult.ExcessWorkingHours:N2}\n\nFirst lines:\n{preview}",
                 "Debug Claim");
         }
         catch (Exception ex)

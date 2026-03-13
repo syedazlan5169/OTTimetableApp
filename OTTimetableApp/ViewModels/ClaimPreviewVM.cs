@@ -20,7 +20,10 @@ public partial class ClaimPreviewVM : ObservableObject
     public decimal Claim15 => Total15 * 1.5m * HourlyRate;
     public decimal Claim175 => Total175 * 1.75m * HourlyRate;
     public decimal Claim20 => Total20 * 2.0m * HourlyRate;
-    public decimal GrandTotal => Claim1125 + Claim125 + Claim15 + Claim175 + Claim20;
+    public decimal ExcessWorkingHoursTotal => ExcessWorkingHours * 1.25m * HourlyRate;
+    public decimal GrandTotal => Claim1125 + Claim125 + Claim15 + Claim175 + Claim20 + ExcessWorkingHoursTotal;
+
+    [ObservableProperty] private decimal excessWorkingHours;
 
     private bool _isBulkUpdating;
 
@@ -85,6 +88,8 @@ public partial class ClaimPreviewVM : ObservableObject
         OnPropertyChanged(nameof(Claim175));
         OnPropertyChanged(nameof(Claim20));
 
+        OnPropertyChanged(nameof(ExcessWorkingHours));
+        OnPropertyChanged(nameof(ExcessWorkingHoursTotal));
         OnPropertyChanged(nameof(GrandTotal));
         OnPropertyChanged(nameof(HourlyRate));
     }
@@ -157,7 +162,9 @@ public partial class ClaimPreviewVM : ObservableObject
         if (SelectedCalendarId == 0) throw new InvalidOperationException("Select a calendar.");
         if (SelectedEmployeeId == 0) throw new InvalidOperationException("Select an employee.");
 
-        var claimLines = _otSvc.BuildMonthlyClaim(SelectedCalendarId, SelectedEmployeeId, SelectedMonth);
+        var claimResult = _otSvc.BuildMonthlyClaim(SelectedCalendarId, SelectedEmployeeId, SelectedMonth);
+        var claimLines = claimResult.ClaimLines;
+        ExcessWorkingHours = claimResult.ExcessWorkingHours;
 
         var baseGroupMap = _empSvc.GetBaseGroupMap();
         if (!baseGroupMap.TryGetValue(SelectedEmployeeId, out var baseGroupId))
