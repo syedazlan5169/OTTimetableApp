@@ -1,7 +1,7 @@
 ﻿<Window x:Class="OTTimetableApp.ClaimPreviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Create Claim" Height="720" Width="993"
+        Title="Create Claim" Height="720" Width="1036"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -59,11 +59,42 @@
                 <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="200"/>
                 <DataGridTextColumn Header="OT Shift" Binding="{Binding Shift}" Width="120"/>
 
-                <DataGridTextColumn Header="1.125" Binding="{Binding H1125, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
-                <DataGridTextColumn Header="1.25" Binding="{Binding H125, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
-                <DataGridTextColumn Header="1.5" Binding="{Binding H15, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
-                <DataGridTextColumn Header="1.75" Binding="{Binding H175, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
-                <DataGridTextColumn Header="2.0" Binding="{Binding H20, StringFormat={}{0:N2}, TargetNullValue=''}" Width="80"/>
+                <DataGridTextColumn Header="1.125" Binding="{Binding H1125, StringFormat={}{0:N2}, TargetNullValue=''}" Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="1.25" Binding="{Binding H125, StringFormat={}{0:N2}, TargetNullValue=''}" Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="1.5" Binding="{Binding H15, StringFormat={}{0:N2}, TargetNullValue=''}" Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="1.75" Binding="{Binding H175, StringFormat={}{0:N2}, TargetNullValue=''}" Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="2.0" Binding="{Binding H20, StringFormat={}{0:N2}, TargetNullValue=''}" Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Remark" Binding="{Binding Remark}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,10,0,0">

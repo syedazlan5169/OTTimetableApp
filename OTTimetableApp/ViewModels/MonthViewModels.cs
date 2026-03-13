@@ -41,7 +41,9 @@ public class ShiftSlotVM
     public SlotFillType FillType { get; set; }
     public string StatusText { get; set; } = "";
     public string? ReplacesName { get; set; }
-    
+    public string? OnLeaveName { get; set; }
+    public bool HasOnLeaveName => !string.IsNullOrEmpty(OnLeaveName);
+
     public List<EmployeeOptionVM> EmployeeOptions { get; set; } = new();
 }
 

@@ -16,4 +16,6 @@ public partial class ClaimLineVM : ObservableObject
     public decimal? H15 { get; set; }
     public decimal? H175 { get; set; }
     public decimal? H20 { get; set; }
+
+    public string Remark { get; set; } = "";
 }

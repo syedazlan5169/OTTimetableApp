@@ -34,4 +34,9 @@ public class OtClaimLine
     public DateOnly UiShiftDate { get; set; }        // timetable row date (clock-out date for night shift)
     public TimeOnly UiShiftFrom { get; set; }
     public TimeOnly UiShiftTo { get; set; }
+
+    // Slot information for remark generation
+    public int? ReplacedEmployeeId { get; set; }
+    public int SlotFillType { get; set; }  // 1=Planned, 2=Replacement, 3=EmptyFill, 4=Empty
+    public int ShiftGroupId { get; set; }
 }

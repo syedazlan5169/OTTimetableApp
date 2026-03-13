@@ -186,7 +186,10 @@ public class OtCalculatorService
                                     UiShiftAssignmentId = sh.Id,
                                     UiShiftDate = rowDay.Date,
                                     UiShiftFrom = uiShiftFrom,
-                                    UiShiftTo = uiShiftTo
+                                    UiShiftTo = uiShiftTo,
+                                    ReplacedEmployeeId = sl.ReplacedEmployeeId,
+                                    SlotFillType = (int)sl.FillType,
+                                    ShiftGroupId = sh.GroupId
                                 });
                             }
                         }
@@ -205,7 +208,10 @@ public class OtCalculatorService
                         UiShiftAssignmentId = sh.Id,
                         UiShiftDate = rowDay.Date,
                         UiShiftFrom = uiShiftFrom,
-                        UiShiftTo = uiShiftTo
+                        UiShiftTo = uiShiftTo,
+                        ReplacedEmployeeId = sl.ReplacedEmployeeId,
+                        SlotFillType = (int)sl.FillType,
+                        ShiftGroupId = sh.GroupId
                     });
                 }
             }
@@ -253,7 +259,10 @@ public class OtCalculatorService
                     UiShiftAssignmentId = s.UiShiftAssignmentId,
                     UiShiftDate = s.UiShiftDate,
                     UiShiftFrom = s.UiShiftFrom,
-                    UiShiftTo = s.UiShiftTo
+                    UiShiftTo = s.UiShiftTo,
+                    ReplacedEmployeeId = s.ReplacedEmployeeId,
+                    SlotFillType = s.SlotFillType,
+                    ShiftGroupId = s.ShiftGroupId
                 });
                 continue;
             }
@@ -290,7 +299,10 @@ public class OtCalculatorService
                 UiShiftAssignmentId = s.UiShiftAssignmentId,
                 UiShiftDate = s.UiShiftDate,
                 UiShiftFrom = trimmedUiFrom,
-                UiShiftTo = s.UiShiftTo
+                UiShiftTo = s.UiShiftTo,
+                ReplacedEmployeeId = s.ReplacedEmployeeId,
+                SlotFillType = s.SlotFillType,
+                ShiftGroupId = s.ShiftGroupId
             });
         }
 
@@ -373,7 +385,10 @@ public class OtCalculatorService
                         UiShiftAssignmentId = r.UiShiftAssignmentId,
                         UiShiftDate = r.UiShiftDate,
                         UiShiftFrom = r.UiShiftFrom,
-                        UiShiftTo = r.UiShiftTo
+                        UiShiftTo = r.UiShiftTo,
+                        ReplacedEmployeeId = r.ReplacedEmployeeId,
+                        SlotFillType = r.SlotFillType,
+                        ShiftGroupId = r.ShiftGroupId
                     });
                 }
 
@@ -439,7 +454,10 @@ public class OtCalculatorService
                         UiShiftAssignmentId = s.UiShiftAssignmentId,
                         UiShiftDate = s.UiShiftDate,
                         UiShiftFrom = s.UiShiftFrom,
-                        UiShiftTo = s.UiShiftTo
+                        UiShiftTo = s.UiShiftTo,
+                        ReplacedEmployeeId = s.ReplacedEmployeeId,
+                        SlotFillType = s.SlotFillType,
+                        ShiftGroupId = s.ShiftGroupId
                     });
                 }
 
@@ -455,7 +473,10 @@ public class OtCalculatorService
                         UiShiftAssignmentId = s.UiShiftAssignmentId,
                         UiShiftDate = s.UiShiftDate,
                         UiShiftFrom = s.UiShiftFrom,
-                        UiShiftTo = s.UiShiftTo
+                        UiShiftTo = s.UiShiftTo,
+                        ReplacedEmployeeId = s.ReplacedEmployeeId,
+                        SlotFillType = s.SlotFillType,
+                        ShiftGroupId = s.ShiftGroupId
                     });
                 }
             }
@@ -489,7 +510,10 @@ public class OtCalculatorService
                 UiShiftAssignmentId = s.UiShiftAssignmentId,
                 UiShiftDate = s.UiShiftDate,
                 UiShiftFrom = s.UiShiftFrom,
-                UiShiftTo = s.UiShiftTo
+                UiShiftTo = s.UiShiftTo,
+                ReplacedEmployeeId = s.ReplacedEmployeeId,
+                SlotFillType = s.SlotFillType,
+                ShiftGroupId = s.ShiftGroupId
             };
         }
 
@@ -718,6 +742,10 @@ public class OtCalculatorService
         public DateOnly UiShiftDate { get; set; }
         public TimeOnly UiShiftFrom { get; set; }
         public TimeOnly UiShiftTo { get; set; }
+
+        public int? ReplacedEmployeeId { get; set; }
+        public int SlotFillType { get; set; }
+        public int ShiftGroupId { get; set; }
     }
 
     private sealed class RawSeg
@@ -730,5 +758,9 @@ public class OtCalculatorService
         public DateOnly UiShiftDate { get; set; }
         public TimeOnly UiShiftFrom { get; set; }
         public TimeOnly UiShiftTo { get; set; }
+
+        public int? ReplacedEmployeeId { get; set; }
+        public int SlotFillType { get; set; }
+        public int ShiftGroupId { get; set; }
     }
 }

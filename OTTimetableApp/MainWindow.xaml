@@ -196,13 +196,30 @@
                                                 <!-- Replaces who -->
                                                 <TextBlock Margin="98,2,0,0"
                                            FontSize="11"
-                                           Foreground="DimGray"
+                                           Foreground="SlateGray"
                                            Text="{Binding ReplacesName, StringFormat=Replaces: {0}}">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <!-- On Leave -->
+                                                <TextBlock Margin="98,2,0,0"
+                                           FontSize="11"
+                                           Foreground="DarkOrange"
+                                           Text="{Binding OnLeaveName, StringFormat=On Leave: {0}}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding HasOnLeaveName}" Value="True">
                                                                     <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
@@ -282,13 +299,30 @@
                                                 <!-- Replaces who -->
                                                 <TextBlock Margin="98,2,0,0"
                                            FontSize="11"
-                                           Foreground="DimGray"
+                                           Foreground="SlateGray"
                                            Text="{Binding ReplacesName, StringFormat=Replaces: {0}}">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <!-- On Leave -->
+                                                <TextBlock Margin="98,2,0,0"
+                                           FontSize="11"
+                                           Foreground="DarkOrange"
+                                           Text="{Binding OnLeaveName, StringFormat=On Leave: {0}}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding HasOnLeaveName}" Value="True">
                                                                     <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
@@ -368,13 +402,30 @@
                                                 <!-- Replaces who -->
                                                 <TextBlock Margin="98,2,0,0"
                                            FontSize="11"
-                                           Foreground="DimGray"
+                                           Foreground="SlateGray"
                                            Text="{Binding ReplacesName, StringFormat=Replaces: {0}}">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding FillType}" Value="Replacement">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <!-- On Leave -->
+                                                <TextBlock Margin="98,2,0,0"
+                                           FontSize="11"
+                                           Foreground="DarkOrange"
+                                           Text="{Binding OnLeaveName, StringFormat=On Leave: {0}}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding HasOnLeaveName}" Value="True">
                                                                     <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>

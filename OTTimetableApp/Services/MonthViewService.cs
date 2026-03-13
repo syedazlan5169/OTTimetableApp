@@ -194,6 +194,15 @@ public class MonthViewService
                                     replacesName = "(UNKNOWN)";
                             }
 
+                            string? onLeaveName = null;
+                            if (sl.FillType == SlotFillType.Empty && sl.PlannedEmployeeId.HasValue)
+                            {
+                                if (empNameById.TryGetValue(sl.PlannedEmployeeId.Value, out var n))
+                                    onLeaveName = n;
+                                else
+                                    onLeaveName = "(UNKNOWN)";
+                            }
+
                             svm.Slots.Add(new ShiftSlotVM
                             {
                                 ShiftSlotId = sl.Id,
@@ -204,6 +213,7 @@ public class MonthViewService
                                 FillType = sl.FillType,
                                 StatusText = statusText,
                                 ReplacesName = replacesName,
+                                OnLeaveName = onLeaveName,
                                 EmployeeOptions = optionList
                             });
                         }

@@ -186,6 +186,39 @@ public partial class ClaimPreviewVM : ObservableObject
                 ? GetWorkingShiftLabel(date)
                 : CategoryToDisplay(category);
 
+            var firstLine = lines.First();
+            string remark = "";
+
+            // Generate remark based on SlotFillType
+            if (firstLine.SlotFillType == 2) // Replacement
+            {
+                if (firstLine.ReplacedEmployeeId.HasValue)
+                {
+                    var replacedEmp = _empSvc.GetAll().FirstOrDefault(e => e.Id == firstLine.ReplacedEmployeeId.Value);
+                    if (replacedEmp != null)
+                    {
+                        remark = $"Ganti {replacedEmp.Name}";
+                    }
+                }
+            }
+            else if (firstLine.SlotFillType == 3) // EmptyFill
+            {
+                var groups = _empSvc.GetGroups();
+                var group = groups.FirstOrDefault(g => g.Id == firstLine.ShiftGroupId);
+                if (group != null)
+                {
+                    remark = $"Isi Kekosongan {group.Name}";
+                }
+            }
+            else
+            {
+                // For Kelepasan Am & Gantian, show category if not replacing/filling
+                if (category == OtCategory.KelepasanAm || category == OtCategory.KelepasanAmGantian)
+                {
+                    remark = CategoryToDisplay(category);
+                }
+            }
+
             var vm = new ClaimLineVM
             {
                 IsChecked = true,
@@ -197,7 +230,9 @@ public partial class ClaimPreviewVM : ObservableObject
                 H125 = lines.Where(x => x.Rate == 1.25m).Sum(x => x.Hours),
                 H15 = lines.Where(x => x.Rate == 1.5m).Sum(x => x.Hours),
                 H175 = lines.Where(x => x.Rate == 1.75m).Sum(x => x.Hours),
-                H20 = lines.Where(x => x.Rate == 2.0m).Sum(x => x.Hours)
+                H20 = lines.Where(x => x.Rate == 2.0m).Sum(x => x.Hours),
+
+                Remark = remark
             };
 
             if (vm.H1125 == 0) vm.H1125 = null;
