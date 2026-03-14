@@ -355,7 +355,7 @@ public partial class ClaimPreviewVM : ObservableObject
 
         if (saveDialog.ShowDialog() == true)
         {
-            _excelSvc.ExportClaim(SelectedCalendarId, SelectedMonth, SelectedEmployeeId, HourlyRate, saveDialog.FileName);
+            _excelSvc.ExportClaim(SelectedCalendarId, SelectedMonth, SelectedEmployeeId, HourlyRate, ExcessWorkingHours, saveDialog.FileName);
             System.Windows.MessageBox.Show("Export successful!", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
     }

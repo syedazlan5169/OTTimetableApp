@@ -22,6 +22,7 @@ public class ExcelExportService
         int month,
         int employeeId,
         decimal hourlyRate,
+        decimal excessWorkingHours,
         string outputPath)
     {
         var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Template", "ot_template.xlsx");
@@ -61,6 +62,9 @@ public class ExcelExportService
         worksheet.Cell("L11").Value = employee.SalaryNo;
         worksheet.Cell("L12").Value = employee.BankAccountNo;
         worksheet.Cell("L13").Value = employee.BankName;
+
+        // Fill Lebihan Jam Bertugas (Excess Working Hours)
+        worksheet.Cell("F18").Value = excessWorkingHours;
 
         workbook.SaveAs(outputPath);
     }
