@@ -27,4 +27,16 @@ public partial class ClaimPreviewWindow : Window
             MessageBox.Show(ex.Message, "Generate Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
+    private void Export_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            _vm.ExportToExcel();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 }

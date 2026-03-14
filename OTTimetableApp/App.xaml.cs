@@ -83,6 +83,7 @@ public partial class App : Application
                 services.AddSingleton<PublicHolidayService>();
                 services.AddSingleton<OtCalculatorService>();
                 services.AddSingleton<EmployeeService>();
+                services.AddSingleton<ExcelExportService>();
                 services.AddTransient<EmployeeManagerVM>();
                 services.AddTransient<EmployeeManagerWindow>();
                 services.AddSingleton<GroupManagerService>();

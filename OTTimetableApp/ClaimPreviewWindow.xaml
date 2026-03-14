@@ -37,7 +37,7 @@
                           SelectedValue="{Binding SelectedEmployeeId}"/>
 
                 <Button Content="Generate" Width="120" Margin="12,0,0,0" Click="Generate_Click"/>
-                
+
                 <CheckBox Content="All"
                           Margin="12,0,0,0"
                           VerticalAlignment="Center"
@@ -126,6 +126,14 @@
                FontSize="16"
                FontWeight="Bold"
                Text="{Binding GrandTotal, StringFormat=Total Claim: RM {0:N2}}"/>
+
+            <Button Content="Export to Excel" 
+                    Width="150" 
+                    Height="35"
+                    Margin="0,15,0,0" 
+                    Click="Export_Click"
+                    HorizontalAlignment="Left"
+                    FontWeight="Bold"/>
         </StackPanel>
     </Grid>
 </Window>

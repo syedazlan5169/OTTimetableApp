@@ -2,6 +2,8 @@
 using OTTimetableApp.Domain.OT;
 using OTTimetableApp.Services;
 using System.Collections.ObjectModel;
+using Microsoft.Win32;
+using System.IO;
 
 namespace OTTimetableApp.ViewModels;
 
@@ -10,6 +12,7 @@ public partial class ClaimPreviewVM : ObservableObject
     private readonly MonthViewService _monthSvc;
     private readonly EmployeeService _empSvc;
     private readonly OtCalculatorService _otSvc;
+    private readonly ExcelExportService _excelSvc;
     public decimal Total1125 => Lines.Where(x => x.IsChecked).Sum(x => x.H1125 ?? 0);
     public decimal Total125 => Lines.Where(x => x.IsChecked).Sum(x => x.H125 ?? 0);
     public decimal Total15 => Lines.Where(x => x.IsChecked).Sum(x => x.H15 ?? 0);
@@ -64,11 +67,12 @@ public partial class ClaimPreviewVM : ObservableObject
     [ObservableProperty] private int selectedMonth;
     [ObservableProperty] private int selectedEmployeeId;
 
-    public ClaimPreviewVM(MonthViewService monthSvc, EmployeeService empSvc, OtCalculatorService otSvc)
+    public ClaimPreviewVM(MonthViewService monthSvc, EmployeeService empSvc, OtCalculatorService otSvc, ExcelExportService excelSvc)
     {
         _monthSvc = monthSvc;
         _empSvc = empSvc;
         _otSvc = otSvc;
+        _excelSvc = excelSvc;
 
         // Auto-select current month when window opens
         SelectedMonth = DateTime.Today.Month;
@@ -330,6 +334,31 @@ public partial class ClaimPreviewVM : ObservableObject
         RefreshTotals();
     }
 
+    public void ExportToExcel()
+    {
+        if (SelectedEmployeeId == 0)
+            throw new InvalidOperationException("Please select an employee.");
+
+        if (Lines.Count == 0)
+            throw new InvalidOperationException("Please generate the claim first.");
+
+        var employee = _empSvc.GetAll().FirstOrDefault(e => e.Id == SelectedEmployeeId);
+        if (employee == null)
+            throw new InvalidOperationException("Employee not found.");
+
+        var saveDialog = new SaveFileDialog
+        {
+            Filter = "Excel Files|*.xlsx",
+            FileName = $"OT_Claim_{employee.Name}_{DateTime.Now:yyyyMMdd}.xlsx",
+            DefaultExt = ".xlsx"
+        };
+
+        if (saveDialog.ShowDialog() == true)
+        {
+            _excelSvc.ExportClaim(SelectedCalendarId, SelectedMonth, SelectedEmployeeId, HourlyRate, saveDialog.FileName);
+            System.Windows.MessageBox.Show("Export successful!", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+    }
 
 }
 
