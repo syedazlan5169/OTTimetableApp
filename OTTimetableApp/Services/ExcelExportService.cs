@@ -3,6 +3,7 @@ using OTTimetableApp.Data.Models;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
 using OTTimetableApp.Data;
+using OTTimetableApp.ViewModels;
 
 namespace OTTimetableApp.Services;
 
@@ -23,6 +24,7 @@ public class ExcelExportService
         int employeeId,
         decimal hourlyRate,
         decimal excessWorkingHours,
+        List<ClaimLineVM> claimLines,
         string outputPath)
     {
         var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Template", "ot_template.xlsx");
@@ -66,7 +68,58 @@ public class ExcelExportService
         // Fill Lebihan Jam Bertugas (Excess Working Hours)
         worksheet.Cell("F18").Value = excessWorkingHours;
 
+        // Fill OT claim lines (only checked lines)
+        var checkedLines = claimLines.Where(l => l.IsChecked).ToList();
+        FillOtLines(worksheet, checkedLines);
+
         workbook.SaveAs(outputPath);
+    }
+
+    private static void FillOtLines(IXLWorksheet worksheet, List<ClaimLineVM> lines)
+    {
+        // Group by date to ensure each date appears only once
+        var groupedByDate = lines
+            .GroupBy(l => l.Date)
+            .OrderBy(g => g.Key)
+            .ToList();
+
+        int currentRow = 20; // Start at row 20
+
+        foreach (var dateGroup in groupedByDate)
+        {
+            var date = dateGroup.Key;
+
+            // Row 1: Date (formatted as dd/MM/yyyy) in Column A
+            worksheet.Cell(currentRow, 1).Value = date.ToString("dd/MM/yyyy");
+
+            // Row 1: Category in Column B
+            // If multiple lines for same date have different categories, concatenate them
+            var categories = dateGroup.Select(l => l.Category).Distinct().ToList();
+            var categoryText = string.Join(", ", categories);
+            worksheet.Cell(currentRow, 2).Value = categoryText;
+
+            // Row 2: Day name in Malay in Column A
+            var dayName = GetMalayDayName(date.DayOfWeek);
+            worksheet.Cell(currentRow + 1, 1).Value = dayName;
+
+            // Move to next date (skip 2 rows)
+            currentRow += 2;
+        }
+    }
+
+    private static string GetMalayDayName(DayOfWeek dayOfWeek)
+    {
+        return dayOfWeek switch
+        {
+            DayOfWeek.Monday => "Isnin",
+            DayOfWeek.Tuesday => "Selasa",
+            DayOfWeek.Wednesday => "Rabu",
+            DayOfWeek.Thursday => "Khamis",
+            DayOfWeek.Friday => "Jumaat",
+            DayOfWeek.Saturday => "Sabtu",
+            DayOfWeek.Sunday => "Ahad",
+            _ => throw new ArgumentOutOfRangeException(nameof(dayOfWeek))
+        };
     }
 
     private static string GetMalayMonthName(int month)
