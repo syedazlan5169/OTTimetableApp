@@ -274,7 +274,7 @@ public partial class ClaimPreviewVM : ObservableObject
                     Vm: BuildVm(
                         date: first.UiShiftDate,
                         category: first.Category,
-                        shift: $"{first.UiShiftFrom:HH:mm}-{first.UiShiftTo:HH:mm}",
+                        shift: $"{first.UiShiftFrom:HH:mm} - {first.UiShiftTo:HH:mm}",
                         lines: g)));
 
                 continue;
@@ -317,7 +317,7 @@ public partial class ClaimPreviewVM : ObservableObject
                     Vm: BuildVm(
                         date: date,
                         category: first.Category,
-                        shift: $"{from:HH:mm}-{to:HH:mm}",
+                        shift: $"{from:HH:mm} - {to:HH:mm}",
                         lines: dg)));
             }
         }

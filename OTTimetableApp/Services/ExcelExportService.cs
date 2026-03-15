@@ -162,7 +162,7 @@ public class ExcelExportService
         if (string.IsNullOrWhiteSpace(shift))
             return 0;
 
-        // Expected format: "07:00-15:00" or "14:00-23:00" or "22:00-00:00"
+        // Expected format: "07:00 - 15:00" or "14:00 - 23:00" or "22:00 - 00:00"
         var parts = shift.Split('-');
         if (parts.Length != 2)
             return 0;
@@ -175,7 +175,7 @@ public class ExcelExportService
         decimal startHour = startTime.Hour + startTime.Minute / 60m;
         decimal endHour = endTime.Hour + endTime.Minute / 60m;
 
-        // Handle overnight shifts (e.g., 22:00-00:00, 23:00-07:00)
+        // Handle overnight shifts (e.g., 22:00 - 00:00, 23:00 - 07:00)
         if (endHour <= startHour)
             endHour += 24;
 
