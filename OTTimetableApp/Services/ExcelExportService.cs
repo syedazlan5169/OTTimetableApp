@@ -88,58 +88,69 @@ public class ExcelExportService
         foreach (var dateGroup in groupedByDate)
         {
             var date = dateGroup.Key;
-            int startRow = currentRow;
-
-            // Row 1: Date (formatted as dd/MM/yyyy) in Column A
-            worksheet.Cell(startRow, 1).Value = date.ToString("dd/MM/yyyy");
-
-            // Row 1: Category in Column B
-            // If multiple lines for same date have different categories, concatenate them
+            var dayName = GetMalayDayName(date.DayOfWeek);
             var categories = dateGroup.Select(l => l.Category).Distinct().ToList();
             var categoryText = string.Join(", ", categories);
-            worksheet.Cell(startRow, 2).Value = categoryText?.ToUpper();
 
-            // Row 2: Day name in Malay in Column A
-            var dayName = GetMalayDayName(date.DayOfWeek);
-            worksheet.Cell(startRow + 1, 1).Value = dayName.ToUpper();
+            var shiftsForDate = dateGroup.ToList();
 
-            // Fill OT shifts and rates for this date
-            int shiftRow = startRow;
-            foreach (var line in dateGroup)
+            // Process shifts in chunks of 2 (max 2 shifts per date+day row pair)
+            for (int i = 0; i < shiftsForDate.Count; i += 2)
             {
-                // Column D: Shift time (e.g., "0700-1500")
-                worksheet.Cell(shiftRow, 4).Value = line.Shift?.ToUpper();
+                int startRow = currentRow;
 
-                // Column F: Total OT hours (duration of shift)
-                var totalHours = CalculateShiftHours(line.Shift);
-                worksheet.Cell(shiftRow, 6).Value = totalHours; // Column F
+                // Row 1: Date (formatted as dd/MM/yyyy) in Column A
+                worksheet.Cell(startRow, 1).Value = date.ToString("dd/MM/yyyy");
 
-                // Fill rate columns (G=1.125, H=1.25, I=1.5, J=1.75, K=2.0)
-                if (line.H1125.HasValue && line.H1125.Value > 0)
-                    worksheet.Cell(shiftRow, 7).Value = line.H1125.Value; // Column G
+                // Row 1: Category in Column B
+                worksheet.Cell(startRow, 2).Value = categoryText?.ToUpper();
 
-                if (line.H125.HasValue && line.H125.Value > 0)
-                    worksheet.Cell(shiftRow, 8).Value = line.H125.Value; // Column H
+                // Row 2: Day name in Malay in Column A
+                worksheet.Cell(startRow + 1, 1).Value = dayName.ToUpper();
 
-                if (line.H15.HasValue && line.H15.Value > 0)
-                    worksheet.Cell(shiftRow, 9).Value = line.H15.Value; // Column I
+                // Fill first shift (always exists)
+                FillShiftRow(worksheet, shiftsForDate[i], startRow);
 
-                if (line.H175.HasValue && line.H175.Value > 0)
-                    worksheet.Cell(shiftRow, 10).Value = line.H175.Value; // Column J
+                // Fill second shift if it exists
+                if (i + 1 < shiftsForDate.Count)
+                {
+                    FillShiftRow(worksheet, shiftsForDate[i + 1], startRow + 1);
+                }
 
-                if (line.H20.HasValue && line.H20.Value > 0)
-                    worksheet.Cell(shiftRow, 11).Value = line.H20.Value; // Column K
-
-                // Column S: Remark (2 rows above the OT line)
-                if (!string.IsNullOrWhiteSpace(line.Remark))
-                    worksheet.Cell(shiftRow - 2, 19).Value = line.Remark?.ToUpper(); // Column S
-
-                shiftRow++;
+                // Move to next row pair (always 2 rows: date + day)
+                currentRow = startRow + 2;
             }
-
-            // Move to next date (at least 2 rows for date + day name)
-            currentRow = startRow + Math.Max(2, dateGroup.Count());
         }
+    }
+
+    private static void FillShiftRow(IXLWorksheet worksheet, ClaimLineVM line, int row)
+    {
+        // Column D: Shift time (e.g., "07:00 - 15:00")
+        worksheet.Cell(row, 4).Value = line.Shift?.ToUpper();
+
+        // Column F: Total OT hours (duration of shift)
+        var totalHours = CalculateShiftHours(line.Shift);
+        worksheet.Cell(row, 6).Value = totalHours; // Column F
+
+        // Fill rate columns (G=1.125, H=1.25, I=1.5, J=1.75, K=2.0)
+        if (line.H1125.HasValue && line.H1125.Value > 0)
+            worksheet.Cell(row, 7).Value = line.H1125.Value; // Column G
+
+        if (line.H125.HasValue && line.H125.Value > 0)
+            worksheet.Cell(row, 8).Value = line.H125.Value; // Column H
+
+        if (line.H15.HasValue && line.H15.Value > 0)
+            worksheet.Cell(row, 9).Value = line.H15.Value; // Column I
+
+        if (line.H175.HasValue && line.H175.Value > 0)
+            worksheet.Cell(row, 10).Value = line.H175.Value; // Column J
+
+        if (line.H20.HasValue && line.H20.Value > 0)
+            worksheet.Cell(row, 11).Value = line.H20.Value; // Column K
+
+        // Column R: Remark (2 rows above the OT line)
+        if (!string.IsNullOrWhiteSpace(line.Remark))
+            worksheet.Cell(row - 2, 18).Value = line.Remark?.ToUpper(); // Column R
     }
 
     private static string GetMalayDayName(DayOfWeek dayOfWeek)

@@ -358,6 +358,13 @@ public partial class ClaimPreviewVM : ObservableObject
             var checkedLines = Lines.Where(l => l.IsChecked).ToList();
             _excelSvc.ExportClaim(SelectedCalendarId, SelectedMonth, SelectedEmployeeId, HourlyRate, ExcessWorkingHours, checkedLines, saveDialog.FileName);
             System.Windows.MessageBox.Show("Export successful!", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+            // Open the folder location
+            var folderPath = Path.GetDirectoryName(saveDialog.FileName);
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                System.Diagnostics.Process.Start("explorer.exe", folderPath);
+            }
         }
     }
 
