@@ -110,6 +110,10 @@ public class ExcelExportService
                 // Column D: Shift time (e.g., "0700-1500")
                 worksheet.Cell(shiftRow, 4).Value = line.Shift?.ToUpper();
 
+                // Column F: Total OT hours (duration of shift)
+                var totalHours = CalculateShiftHours(line.Shift);
+                worksheet.Cell(shiftRow, 6).Value = totalHours; // Column F
+
                 // Fill rate columns (G=1.125, H=1.25, I=1.5, J=1.75, K=2.0)
                 if (line.H1125.HasValue && line.H1125.Value > 0)
                     worksheet.Cell(shiftRow, 7).Value = line.H1125.Value; // Column G
@@ -125,6 +129,10 @@ public class ExcelExportService
 
                 if (line.H20.HasValue && line.H20.Value > 0)
                     worksheet.Cell(shiftRow, 11).Value = line.H20.Value; // Column K
+
+                // Column S: Remark (2 rows above the OT line)
+                if (!string.IsNullOrWhiteSpace(line.Remark))
+                    worksheet.Cell(shiftRow - 2, 19).Value = line.Remark?.ToUpper(); // Column S
 
                 shiftRow++;
             }
@@ -147,6 +155,31 @@ public class ExcelExportService
             DayOfWeek.Sunday => "Ahad",
             _ => throw new ArgumentOutOfRangeException(nameof(dayOfWeek))
         };
+    }
+
+    private static decimal CalculateShiftHours(string? shift)
+    {
+        if (string.IsNullOrWhiteSpace(shift))
+            return 0;
+
+        // Expected format: "07:00-15:00" or "14:00-23:00" or "22:00-00:00"
+        var parts = shift.Split('-');
+        if (parts.Length != 2)
+            return 0;
+
+        if (!TimeOnly.TryParse(parts[0].Trim(), out var startTime) || 
+            !TimeOnly.TryParse(parts[1].Trim(), out var endTime))
+            return 0;
+
+        // Convert to decimal hours
+        decimal startHour = startTime.Hour + startTime.Minute / 60m;
+        decimal endHour = endTime.Hour + endTime.Minute / 60m;
+
+        // Handle overnight shifts (e.g., 22:00-00:00, 23:00-07:00)
+        if (endHour <= startHour)
+            endHour += 24;
+
+        return endHour - startHour;
     }
 
     private static string GetMalayMonthName(int month)
