@@ -346,6 +346,36 @@ public partial class ClaimPreviewVM : ObservableObject
         if (employee == null)
             throw new InvalidOperationException("Employee not found.");
 
+        var checkedLines = Lines.Where(l => l.IsChecked).ToList();
+        if (checkedLines.Count == 0)
+            throw new InvalidOperationException("Please check at least one OT line to export.");
+
+        // Calculate total rows needed (start at row 20, max row 53 = 34 rows available)
+        const int startRow = 20;
+        const int maxRow = 53;
+        const int maxAvailableRows = maxRow - startRow + 1; // 34 rows
+
+        int totalRowsNeeded = 0;
+        var groupedByDate = checkedLines.GroupBy(l => l.Date);
+        foreach (var dateGroup in groupedByDate)
+        {
+            int shiftsCount = dateGroup.Count();
+            // Each date needs ceil(shiftsCount / 2) * 2 rows
+            int rowPairsNeeded = (int)Math.Ceiling(shiftsCount / 2.0);
+            totalRowsNeeded += rowPairsNeeded * 2;
+        }
+
+        if (totalRowsNeeded > maxAvailableRows)
+        {
+            System.Windows.MessageBox.Show(
+                $"Too many OT lines selected! The Excel template can only handle {maxAvailableRows} rows, but {totalRowsNeeded} rows are needed.\n\n" +
+                "Please uncheck some OT lines to reduce the number of rows and try again.",
+                "Export Limit Exceeded",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
         var saveDialog = new SaveFileDialog
         {
             Filter = "Excel Files|*.xlsx",
@@ -355,7 +385,6 @@ public partial class ClaimPreviewVM : ObservableObject
 
         if (saveDialog.ShowDialog() == true)
         {
-            var checkedLines = Lines.Where(l => l.IsChecked).ToList();
             _excelSvc.ExportClaim(SelectedCalendarId, SelectedMonth, SelectedEmployeeId, HourlyRate, ExcessWorkingHours, checkedLines, saveDialog.FileName);
             System.Windows.MessageBox.Show("Export successful!", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
