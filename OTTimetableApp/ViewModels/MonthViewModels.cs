@@ -25,6 +25,7 @@ public class DayRowVM
 public class ShiftVM
 {
     public int ShiftAssignmentId { get; set; }
+    public int GroupId { get; set; }
     public string GroupName { get; set; } = "";
     public ObservableCollection<ShiftSlotVM> Slots { get; set; } = new();
 }

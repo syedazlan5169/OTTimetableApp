@@ -147,6 +147,7 @@ public class MonthViewService
                     var svm = new ShiftVM
                     {
                         ShiftAssignmentId = sh.Id,
+                        GroupId = sh.GroupId,
                         GroupName = groupNames[sh.GroupId]
                     };
 
