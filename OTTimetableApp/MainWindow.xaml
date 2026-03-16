@@ -463,11 +463,51 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <TextBlock Text="{Binding OffGroupName}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <!-- Group name with styled header -->
+                                <Border Background="#F0F0F0"
+                                        BorderBrush="#CCCCCC"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8,6"
+                                        Margin="0,0,0,6">
+                                    <TextBlock Text="{Binding OffGroupName}" 
+                                               FontWeight="Bold" 
+                                               FontSize="13"
+                                               Foreground="#555555"
+                                               HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Member list with enhanced styling -->
                                 <ItemsControl ItemsSource="{Binding OffGroupMembers}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding}"/>
+                                            <Border Background="#FAFAFA"
+                                                    BorderBrush="#E0E0E0"
+                                                    BorderThickness="0.5"
+                                                    CornerRadius="3"
+                                                    Padding="8,4"
+                                                    Margin="0,2">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Status indicator dot -->
+                                                    <Ellipse Width="6" 
+                                                             Height="6" 
+                                                             Fill="#90CAF9"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,8,0"/>
+
+                                                    <!-- Employee name -->
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding}" 
+                                                               FontSize="12"
+                                                               Foreground="#333333"
+                                                               VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
