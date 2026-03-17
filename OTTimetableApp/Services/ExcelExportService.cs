@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using OTTimetableApp.Data;
 using OTTimetableApp.ViewModels;
+using System.Reflection;
 
 namespace OTTimetableApp.Services;
 
@@ -27,7 +28,9 @@ public class ExcelExportService
         List<ClaimLineVM> claimLines,
         string outputPath)
     {
-        var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Template", "ot_template.xlsx");
+        var baseDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) 
+                           ?? AppDomain.CurrentDomain.BaseDirectory;
+        var templatePath = Path.Combine(baseDirectory, "Template", "ot_template.xlsx");
 
         if (!File.Exists(templatePath))
             throw new FileNotFoundException("Template file not found", templatePath);

@@ -376,11 +376,18 @@ public partial class ClaimPreviewVM : ObservableObject
             return;
         }
 
+        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var claimsFolder = Path.Combine(documentsPath, "Claims");
+
+        if (!Directory.Exists(claimsFolder))
+            Directory.CreateDirectory(claimsFolder);
+
         var saveDialog = new SaveFileDialog
         {
             Filter = "Excel Files|*.xlsx",
             FileName = $"OT_Claim_{employee.Name}_{DateTime.Now:yyyyMMdd}.xlsx",
-            DefaultExt = ".xlsx"
+            DefaultExt = ".xlsx",
+            InitialDirectory = claimsFolder
         };
 
         if (saveDialog.ShowDialog() == true)

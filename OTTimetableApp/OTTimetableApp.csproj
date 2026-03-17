@@ -7,15 +7,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UserSecretsId>77d5af9d-aa1a-402b-bdbd-e609dc47c1df</UserSecretsId>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="favicon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
 	<None Update="appsettings.json">
 	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</None>
-	<None Update="Template\ot_template.xlsx">
+	<Content Include="Template\ot_template.xlsx">
 	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</None>
+	</Content>
 	<PackageReference Include="ClosedXML" Version="0.105.0" />
 	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 	<PackageReference Include="EPPlus" Version="8.5.0" />
