@@ -56,7 +56,15 @@
                         Click="ExportPdf_Click"
                         Background="LightGreen"/>
 
-                <Button Content="Database Setup" Width="140" Margin="10,0,0,0" Click="DatabaseSetup_Click"/>
+                <Button Width="40" 
+                        Height="32"
+                        Margin="10,0,0,0" 
+                        Click="DatabaseSetup_Click"
+                        ToolTip="Database Setup">
+                    <TextBlock Text="&#xE115;" 
+                               FontFamily="Segoe MDL2 Assets" 
+                               FontSize="18"/>
+                </Button>
                 
             </StackPanel>
 
