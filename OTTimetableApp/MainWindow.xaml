@@ -50,6 +50,12 @@
                 <!-- <Button Content="Debug Claim" Width="110" Margin="12,0,0,0" Click="DebugClaim_Click"/> -->
                 <Button Content="Create Claim" Width="140" Margin="10,0,0,0" Click="CreateClaim_Click"/>
 
+                <Button Content="Export to PDF" 
+                        Width="140" 
+                        Margin="10,0,0,0" 
+                        Click="ExportPdf_Click"
+                        Background="LightGreen"/>
+
                 <Button Content="Database Setup" Width="140" Margin="10,0,0,0" Click="DatabaseSetup_Click"/>
                 
             </StackPanel>

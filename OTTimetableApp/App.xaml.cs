@@ -84,6 +84,7 @@ public partial class App : Application
                 services.AddSingleton<OtCalculatorService>();
                 services.AddSingleton<EmployeeService>();
                 services.AddSingleton<ExcelExportService>();
+                services.AddSingleton<PdfExportService>();
                 services.AddTransient<EmployeeManagerVM>();
                 services.AddTransient<EmployeeManagerWindow>();
                 services.AddSingleton<GroupManagerService>();
@@ -92,6 +93,7 @@ public partial class App : Application
                 services.AddTransient<ClaimPreviewVM>();
                 services.AddTransient<ClaimPreviewWindow>();
                 services.AddTransient<DatabaseSetupWindow>();
+                services.AddTransient<DateRangePickerDialog>();
 
                 Services = services.BuildServiceProvider();
 

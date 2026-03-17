@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using OTTimetableApp.Data;
 using OTTimetableApp.Services;
 using OTTimetableApp.ViewModels;
@@ -16,8 +17,9 @@ public partial class MainWindow : Window
     private readonly OtCalculatorService _otSvc;
     private readonly ClaimPreviewWindow _claimWin;
     private readonly IServiceProvider _sp;
+    private readonly PdfExportService _pdfSvc;
 
-    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc, PublicHolidayService phSvc, OtCalculatorService otSvc, ClaimPreviewWindow claimWin, IServiceProvider sp)
+    public MainWindow(MonthViewerVM vm, SlotUpdateService slotSvc, PublicHolidayService phSvc, OtCalculatorService otSvc, ClaimPreviewWindow claimWin, IServiceProvider sp, PdfExportService pdfSvc)
     {
         InitializeComponent();
         _claimWin = claimWin;
@@ -25,6 +27,7 @@ public partial class MainWindow : Window
         _slotSvc = slotSvc;
         _phSvc = phSvc;
         _otSvc = otSvc;
+        _pdfSvc = pdfSvc;
 
         DataContext = _vm;
 
@@ -215,6 +218,49 @@ public partial class MainWindow : Window
         {
             TimetableGrid.ScrollIntoView(todayRow);
             TimetableGrid.SelectedItem = todayRow;
+        }
+    }
+
+    private void ExportPdf_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // Check if a calendar is selected
+            if (_vm.SelectedCalendarId == 0)
+            {
+                MessageBox.Show("Please select a calendar first.", "No Calendar Selected",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Show date range picker dialog
+            var dialog = _sp.GetRequiredService<DateRangePickerDialog>();
+            dialog.Owner = this;
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            // Show save file dialog
+            var saveDialog = new SaveFileDialog
+            {
+                Filter = "PDF Files (*.pdf)|*.pdf",
+                DefaultExt = "pdf",
+                FileName = $"OT_Timetable_{dialog.StartDate:yyyy-MM-dd}_to_{dialog.EndDate:yyyy-MM-dd}.pdf"
+            };
+
+            if (saveDialog.ShowDialog() != true)
+                return;
+
+            // Export to PDF
+            _pdfSvc.ExportToPdf(_vm.SelectedCalendarId, dialog.StartDate, dialog.EndDate, saveDialog.FileName);
+
+            MessageBox.Show($"PDF exported successfully to:\n{saveDialog.FileName}", "Export Successful",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to export PDF:\n{ex.Message}", "Export Failed",
+                MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
