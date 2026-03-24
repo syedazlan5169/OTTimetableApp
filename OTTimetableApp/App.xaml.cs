@@ -12,24 +12,30 @@ namespace OTTimetableApp;
 
 public partial class App : Application
 {
-    public static IServiceProvider Services { get; private set; } = null!;
+    private static ServiceProvider? _serviceProvider;
+    public static IServiceProvider Services => _serviceProvider!;
+
+    private UnhandledExceptionEventHandler? _domainExceptionHandler;
+    private System.Windows.Threading.DispatcherUnhandledExceptionEventHandler? _dispatcherExceptionHandler;
 
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-
-        this.DispatcherUnhandledException += (s, ex) =>
+        // Store event handlers so we can unsubscribe later
+        _dispatcherExceptionHandler = (s, ex) =>
         {
             MessageBox.Show(ex.Exception.ToString(), "Unhandled UI Exception");
             ex.Handled = true;
         };
+        this.DispatcherUnhandledException += _dispatcherExceptionHandler;
 
-        AppDomain.CurrentDomain.UnhandledException += (s, ex) =>
+        _domainExceptionHandler = (s, ex) =>
         {
             MessageBox.Show(ex.ExceptionObject?.ToString() ?? "Unknown", "Unhandled AppDomain Exception");
         };
+        AppDomain.CurrentDomain.UnhandledException += _domainExceptionHandler;
 
         var serverVersion = new MySqlServerVersion(new Version(8, 0, 0));
 
@@ -95,7 +101,7 @@ public partial class App : Application
                 services.AddTransient<DatabaseSetupWindow>();
                 services.AddTransient<DateRangePickerDialog>();
 
-                Services = services.BuildServiceProvider();
+                _serviceProvider = services.BuildServiceProvider();
 
                 var mainWindow = Services.GetRequiredService<MainWindow>();
                 mainWindow.Show();
@@ -114,5 +120,21 @@ public partial class App : Application
                 }
             }
         }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        // Unsubscribe event handlers to release references
+        if (_dispatcherExceptionHandler != null)
+            this.DispatcherUnhandledException -= _dispatcherExceptionHandler;
+
+        if (_domainExceptionHandler != null)
+            AppDomain.CurrentDomain.UnhandledException -= _domainExceptionHandler;
+
+        // Dispose ServiceProvider to clean up all services and DbContext connections
+        _serviceProvider?.Dispose();
+        _serviceProvider = null;
+
+        base.OnExit(e);
     }
 }

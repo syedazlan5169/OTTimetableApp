@@ -42,6 +42,8 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        // Unsubscribe immediately after first load to prevent memory leaks
+        Loaded -= MainWindow_Loaded;
         ScrollToToday();
     }
     private void CreateClaim_Click(object sender, RoutedEventArgs e)
