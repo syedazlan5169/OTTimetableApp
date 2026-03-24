@@ -56,8 +56,8 @@
                         Click="ExportPdf_Click"
                         Background="LightGreen"/>
 
-                <Button Width="40" 
-                        Height="32"
+                <Button Width="30" 
+                        Height="25"
                         Margin="10,0,0,0" 
                         Click="DatabaseSetup_Click"
                         ToolTip="Database Setup">
@@ -65,7 +65,7 @@
                                FontFamily="Segoe MDL2 Assets" 
                                FontSize="18"/>
                 </Button>
-                
+
             </StackPanel>
 
             <TextBlock Text="{Binding MonthTitle}"
