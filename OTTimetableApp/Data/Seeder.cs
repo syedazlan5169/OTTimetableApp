@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OTTimetableApp.Data.Models;
+using OTTimetableApp.Services;
 
 namespace OTTimetableApp.Data;
 
@@ -7,7 +8,10 @@ public static class Seeder
 {
     public static void SeedIfEmpty(AppDbContext db)
     {
-        // If groups already exist, assume seeded
+        // Always ensure admin user exists, independent of other seed data
+        SeedAdminUser(db);
+
+        // If groups already exist, assume everything else is seeded
         if (db.Groups.Any()) return;
 
         // 1) Employees
@@ -74,6 +78,18 @@ public static class Seeder
             new GroupMember { GroupId = gD.Id, SlotIndex = 5, EmployeeId = null }
         );
 
+        db.SaveChanges();
+    }
+
+    private static void SeedAdminUser(AppDbContext db)
+    {
+        if (db.AdminUsers.Any()) return;
+
+        db.AdminUsers.Add(new AdminUser
+        {
+            Username = "admin",
+            PasswordHash = AdminAuthService.HashPassword("Lanpke050890!")
+        });
         db.SaveChanges();
     }
 }

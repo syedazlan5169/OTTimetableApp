@@ -62,9 +62,15 @@ public partial class MainWindow : Window
 
     private void Admin_Click(object sender, RoutedEventArgs e)
     {
-        var win = _sp.GetRequiredService<AdminWindow>();
-        win.Owner = this;
-        win.ShowDialog();
+        var loginWin = _sp.GetRequiredService<AdminLoginWindow>();
+        loginWin.Owner = this;
+        loginWin.ShowDialog();
+
+        if (!loginWin.Authenticated) return;
+
+        var adminWin = _sp.GetRequiredService<AdminWindow>();
+        adminWin.Owner = this;
+        adminWin.ShowDialog();
     }
 
     private void Calendar_Changed(object sender, SelectionChangedEventArgs e)

@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<ShiftAssignment> ShiftAssignments => Set<ShiftAssignment>();
     public DbSet<ShiftSlot> ShiftSlots => Set<ShiftSlot>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,6 +24,10 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<AuditLog>()
             .HasIndex(a => a.Timestamp);
+
+        modelBuilder.Entity<AdminUser>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
 
         modelBuilder.Entity<Employee>()
             .Property(e => e.Salary)

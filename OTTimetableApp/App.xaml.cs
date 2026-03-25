@@ -87,6 +87,7 @@ public partial class App : Application
 
                 services.AddSingleton<MonthViewService>();
                 services.AddSingleton<AuditLogService>();
+                services.AddSingleton<AdminAuthService>();
                 services.AddTransient<MonthViewerVM>();
                 services.AddTransient<MainWindow>();
                 services.AddSingleton<CalendarGeneratorService2>();
@@ -111,6 +112,8 @@ public partial class App : Application
                 services.AddTransient<SystemInfoWindow>();
                 services.AddTransient<ReplacementReportWindow>();
                 services.AddTransient<PhBulkImportWindow>();
+                services.AddTransient<AdminLoginWindow>();
+                services.AddTransient<ChangePasswordWindow>();
 
                 _serviceProvider = services.BuildServiceProvider();
 
