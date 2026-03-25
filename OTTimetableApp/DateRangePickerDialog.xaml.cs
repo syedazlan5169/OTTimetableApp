@@ -11,42 +11,80 @@ public partial class DateRangePickerDialog : Window
     public DateRangePickerDialog()
     {
         InitializeComponent();
-        
+
+        // Populate month list (12 months for current year)
+        PopulateMonthList();
+
         // Default to current month
         var today = DateOnly.FromDateTime(DateTime.Today);
         var firstDay = new DateOnly(today.Year, today.Month, 1);
         var lastDay = firstDay.AddMonths(1).AddDays(-1);
-        
+
         StartDatePicker.SelectedDate = firstDay.ToDateTime(TimeOnly.MinValue);
         EndDatePicker.SelectedDate = lastDay.ToDateTime(TimeOnly.MinValue);
-        
+
         MonthRadio.IsChecked = true;
+
+        // Select current month in combo box
+        SelectCurrentMonth();
+    }
+
+    private void PopulateMonthList()
+    {
+        var today = DateTime.Today;
+        var currentYear = today.Year;
+
+        var monthItems = new List<MonthItem>();
+
+        for (int month = 1; month <= 12; month++)
+        {
+            var date = new DateTime(currentYear, month, 1);
+            monthItems.Add(new MonthItem
+            {
+                DisplayName = date.ToString("MMMM"),
+                Year = currentYear,
+                Month = month
+            });
+        }
+
+        MonthComboBox.ItemsSource = monthItems;
+        MonthComboBox.DisplayMemberPath = nameof(MonthItem.DisplayName);
+    }
+
+    private void SelectCurrentMonth()
+    {
+        var today = DateTime.Today;
+        var currentMonth = MonthComboBox.ItemsSource.Cast<MonthItem>()
+            .FirstOrDefault(m => m.Month == today.Month);
+
+        if (currentMonth != null)
+            MonthComboBox.SelectedItem = currentMonth;
     }
 
     private void MonthRadio_Checked(object sender, RoutedEventArgs e)
     {
-        if (MonthPicker == null) return;
-        
-        MonthPicker.IsEnabled = true;
+        if (MonthComboBox == null) return;
+
+        MonthComboBox.IsEnabled = true;
         StartDatePicker.IsEnabled = false;
         EndDatePicker.IsEnabled = false;
-        
+
         IsMonthMode = true;
         UpdateDatesFromMonth();
     }
 
     private void CustomRadio_Checked(object sender, RoutedEventArgs e)
     {
-        if (MonthPicker == null) return;
-        
-        MonthPicker.IsEnabled = false;
+        if (MonthComboBox == null) return;
+
+        MonthComboBox.IsEnabled = false;
         StartDatePicker.IsEnabled = true;
         EndDatePicker.IsEnabled = true;
-        
+
         IsMonthMode = false;
     }
 
-    private void MonthPicker_SelectedDateChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    private void MonthComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         if (MonthRadio?.IsChecked == true)
         {
@@ -56,12 +94,11 @@ public partial class DateRangePickerDialog : Window
 
     private void UpdateDatesFromMonth()
     {
-        if (MonthPicker.SelectedDate.HasValue)
+        if (MonthComboBox.SelectedItem is MonthItem monthItem)
         {
-            var date = DateOnly.FromDateTime(MonthPicker.SelectedDate.Value);
-            var firstDay = new DateOnly(date.Year, date.Month, 1);
+            var firstDay = new DateOnly(monthItem.Year, monthItem.Month, 1);
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
-            
+
             StartDatePicker.SelectedDate = firstDay.ToDateTime(TimeOnly.MinValue);
             EndDatePicker.SelectedDate = lastDay.ToDateTime(TimeOnly.MinValue);
         }
@@ -94,5 +131,12 @@ public partial class DateRangePickerDialog : Window
     {
         DialogResult = false;
         Close();
+    }
+
+    private class MonthItem
+    {
+        public string DisplayName { get; set; } = string.Empty;
+        public int Year { get; set; }
+        public int Month { get; set; }
     }
 }

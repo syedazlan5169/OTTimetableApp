@@ -57,8 +57,8 @@ public class PdfExportService
         {
             container.Page(page =>
             {
-                page.Size(PageSizes.A4.Landscape());
-                page.Margin(20);
+                page.Size(PageSizes.A4);
+                page.Margin(10);
 
                 page.Header().Column(column =>
                 {
@@ -68,61 +68,71 @@ public class PdfExportService
                         .FontSize(12);
                 });
 
-                page.Content().Table(table =>
+                page.Content().Column(content =>
                 {
-                    // Define columns
-                    table.ColumnsDefinition(columns =>
+                    // Header row
+                    content.Item().Table(headerTable =>
                     {
-                        columns.ConstantColumn(80);  // Date
-                        columns.RelativeColumn(1);   // Night
-                        columns.RelativeColumn(1);   // Morning
-                        columns.RelativeColumn(1);   // Evening
+                        headerTable.ColumnsDefinition(columns =>
+                        {
+                            columns.ConstantColumn(60);  // Date
+                            columns.RelativeColumn(1);   // Night
+                            columns.RelativeColumn(1);   // Morning
+                            columns.RelativeColumn(1);   // Evening
+                        });
+
+                        headerTable.Cell().Background(Colors.Grey.Lighten2).Padding(3).Border(0.5f)
+                            .Text("Tarikh").Bold().FontSize(9);
+                        headerTable.Cell().Background(Colors.Grey.Lighten2).Padding(3).Border(0.5f)
+                            .Text("22:00 - 07:00").Bold().FontSize(9);
+                        headerTable.Cell().Background(Colors.Grey.Lighten2).Padding(3).Border(0.5f)
+                            .Text("07:00 - 15:00").Bold().FontSize(9);
+                        headerTable.Cell().Background(Colors.Grey.Lighten2).Padding(3).Border(0.5f)
+                            .Text("14:00 - 23:00").Bold().FontSize(9);
                     });
 
-                    // Header
-                    table.Header(header =>
-                    {
-                        header.Cell().Background(Colors.Grey.Lighten2).Padding(5)
-                            .Text("Tarikh").Bold().FontSize(10);
-                        header.Cell().Background(Colors.Grey.Lighten2).Padding(5)
-                            .Text("22:00 - 07:00").Bold().FontSize(10);
-                        header.Cell().Background(Colors.Grey.Lighten2).Padding(5)
-                            .Text("07:00 - 15:00").Bold().FontSize(10);
-                        header.Cell().Background(Colors.Grey.Lighten2).Padding(5)
-                            .Text("14:00 - 23:00").Bold().FontSize(10);
-                    });
-
-                    // Rows
+                    // Rows - each day as separate table to prevent splitting
                     foreach (var day in days)
                     {
-                        // Date column
-                        table.Cell().Border(1).Padding(5)
-                            .Column(column =>
+                        content.Item().ShowOnce().Table(dayTable =>
+                        {
+                            dayTable.ColumnsDefinition(columns =>
                             {
-                                column.Item().Text(day.DateDisplay).FontSize(9).Bold();
-                                column.Item().Text(day.DayName).FontSize(8);
-                                
-                                if (day.IsPublicHoliday)
-                                {
-                                    column.Item().Text("PUBLIC HOLIDAY")
-                                        .FontSize(7).Bold().FontColor(Colors.Red.Medium);
-                                    if (!string.IsNullOrEmpty(day.PublicHolidayName))
-                                        column.Item().Text(day.PublicHolidayName)
-                                            .FontSize(7).Italic().FontColor(Colors.Red.Darken2);
-                                }
+                                columns.ConstantColumn(60);  // Date
+                                columns.RelativeColumn(1);   // Night
+                                columns.RelativeColumn(1);   // Morning
+                                columns.RelativeColumn(1);   // Evening
                             });
 
-                        // Night shift
-                        table.Cell().Border(1).Padding(5)
-                            .Column(column => RenderShift(column, day.Night));
+                            // Date column
+                            dayTable.Cell().Border(0.5f).Padding(3)
+                                .Column(column =>
+                                {
+                                    column.Item().Text(day.DateDisplay).FontSize(8).Bold();
+                                    column.Item().Text(day.DayName).FontSize(7);
 
-                        // Morning shift
-                        table.Cell().Border(1).Padding(5)
-                            .Column(column => RenderShift(column, day.Morning));
+                                    if (day.IsPublicHoliday)
+                                    {
+                                        column.Item().Text("PUBLIC HOLIDAY")
+                                            .FontSize(6).Bold().FontColor(Colors.Red.Medium);
+                                        if (!string.IsNullOrEmpty(day.PublicHolidayName))
+                                            column.Item().Text(day.PublicHolidayName)
+                                                .FontSize(6).Italic().FontColor(Colors.Red.Darken2);
+                                    }
+                                });
 
-                        // Evening shift
-                        table.Cell().Border(1).Padding(5)
-                            .Column(column => RenderShift(column, day.Evening));
+                            // Night shift
+                            dayTable.Cell().Border(0.5f).Padding(3)
+                                .Column(column => RenderShift(column, day.Night));
+
+                            // Morning shift
+                            dayTable.Cell().Border(0.5f).Padding(3)
+                                .Column(column => RenderShift(column, day.Morning));
+
+                            // Evening shift
+                            dayTable.Cell().Border(0.5f).Padding(3)
+                                .Column(column => RenderShift(column, day.Evening));
+                        });
                     }
                 });
 
@@ -144,36 +154,31 @@ public class PdfExportService
     {
         // Group name header
         var bgColor = GetGroupColor(shift.GroupId);
-        column.Item().Background(bgColor).Padding(3)
-            .Text(shift.GroupName).FontSize(8).Bold();
+        column.Item().Background(bgColor).Padding(2)
+            .Text(shift.GroupName).FontSize(7).Bold();
 
         // Slots
         foreach (var slot in shift.Slots)
         {
-            column.Item().PaddingTop(2).Row(row =>
+            column.Item().PaddingTop(1).Row(row =>
             {
-                row.AutoItem().Width(15).Text($"{slot.SlotIndex}.").FontSize(8);
-                
-                row.AutoItem().Width(50).PaddingLeft(2)
-                    .Background(GetStatusColor(slot.FillType))
-                    .Padding(2)
-                    .Text(slot.StatusText).FontSize(7).Bold();
+                row.AutoItem().Width(12).Text($"{slot.SlotIndex}.").FontSize(7);
 
-                row.RelativeItem().PaddingLeft(3)
-                    .Text(GetEmployeeName(slot)).FontSize(8);
+                row.RelativeItem().PaddingLeft(2)
+                    .Text(GetEmployeeName(slot)).FontSize(7);
             });
 
             // Show replacement or on leave info
             if (!string.IsNullOrEmpty(slot.ReplacesName))
             {
-                column.Item().PaddingLeft(18).Text($"Replaces: {slot.ReplacesName}")
-                    .FontSize(7).Italic().FontColor(Colors.Grey.Darken1);
+                column.Item().PaddingLeft(14).Text($"Replaces: {slot.ReplacesName}")
+                    .FontSize(6).Italic().FontColor(Colors.Grey.Darken1);
             }
-            
+
             if (!string.IsNullOrEmpty(slot.OnLeaveName))
             {
-                column.Item().PaddingLeft(18).Text($"On Leave: {slot.OnLeaveName}")
-                    .FontSize(7).Italic().FontColor(Colors.Orange.Medium);
+                column.Item().PaddingLeft(14).Text($"On Leave: {slot.OnLeaveName}")
+                    .FontSize(6).Italic().FontColor(Colors.Orange.Medium);
             }
         }
     }

@@ -25,13 +25,13 @@
                         IsChecked="True"
                         Margin="0,0,0,10"
                         Checked="MonthRadio_Checked"/>
-            
+
             <StackPanel Margin="25,0,0,20">
                 <TextBlock Text="Month:" Margin="0,0,0,5"/>
-                <DatePicker x:Name="MonthPicker"
-                           Width="200"
-                           HorizontalAlignment="Left"
-                           SelectedDateChanged="MonthPicker_SelectedDateChanged"/>
+                <ComboBox x:Name="MonthComboBox"
+                          Width="200"
+                          HorizontalAlignment="Left"
+                          SelectionChanged="MonthComboBox_SelectionChanged"/>
             </StackPanel>
 
             <!-- Custom Date Range -->
