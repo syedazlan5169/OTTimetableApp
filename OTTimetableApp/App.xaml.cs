@@ -108,6 +108,7 @@ public partial class App : Application
                 services.AddTransient<DateRangePickerDialog>();
                 services.AddTransient<AuditLogWindow>();
                 services.AddTransient<AdminWindow>();
+                services.AddTransient<SystemInfoWindow>();
 
                 _serviceProvider = services.BuildServiceProvider();
 

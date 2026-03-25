@@ -40,4 +40,14 @@ public class AuditLogService
 
         return query.Take(500).ToList();
     }
+
+    public int PurgeOlderThan(int days)
+    {
+        var cutoff = DateTime.Now.AddDays(-days);
+        using var db = _dbFactory.CreateDbContext();
+        var old = db.AuditLogs.Where(l => l.Timestamp < cutoff).ToList();
+        db.AuditLogs.RemoveRange(old);
+        db.SaveChanges();
+        return old.Count;
+    }
 }
