@@ -15,10 +15,14 @@ public class AppDbContext : DbContext
     public DbSet<CalendarDay> CalendarDays => Set<CalendarDay>();
     public DbSet<ShiftAssignment> ShiftAssignments => Set<ShiftAssignment>();
     public DbSet<ShiftSlot> ShiftSlots => Set<ShiftSlot>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<AuditLog>()
+            .HasIndex(a => a.Timestamp);
 
         modelBuilder.Entity<Employee>()
             .Property(e => e.Salary)

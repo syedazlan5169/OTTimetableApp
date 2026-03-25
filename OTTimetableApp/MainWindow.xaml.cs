@@ -230,6 +230,13 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ViewLogs_Click(object sender, RoutedEventArgs e)
+    {
+        var win = _sp.GetRequiredService<AuditLogWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+    }
+
     private void ExportPdf_Click(object sender, RoutedEventArgs e)
     {
         try

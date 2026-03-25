@@ -86,6 +86,7 @@ public partial class App : Application
                 }, ServiceLifetime.Singleton);
 
                 services.AddSingleton<MonthViewService>();
+                services.AddSingleton<AuditLogService>();
                 services.AddTransient<MonthViewerVM>();
                 services.AddTransient<MainWindow>();
                 services.AddSingleton<CalendarGeneratorService2>();
@@ -105,6 +106,7 @@ public partial class App : Application
                 services.AddTransient<ClaimPreviewWindow>();
                 services.AddTransient<DatabaseSetupWindow>();
                 services.AddTransient<DateRangePickerDialog>();
+                services.AddTransient<AuditLogWindow>();
 
                 _serviceProvider = services.BuildServiceProvider();
 

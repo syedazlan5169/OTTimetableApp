@@ -8,10 +8,12 @@ namespace OTTimetableApp.Services;
 public class MonthViewService
 {
     private readonly IDbContextFactory<AppDbContext> _dbFactory;
+    private readonly AuditLogService _auditSvc;
 
-    public MonthViewService(IDbContextFactory<AppDbContext> dbFactory)
+    public MonthViewService(IDbContextFactory<AppDbContext> dbFactory, AuditLogService auditSvc)
     {
         _dbFactory = dbFactory;
+        _auditSvc = auditSvc;
     }
 
     public List<CalendarOptionVM> ListCalendars()
@@ -323,6 +325,8 @@ public class MonthViewService
         db.Calendars.Add(cal);
         db.SaveChanges();
 
+        _auditSvc.Log("CalendarCreated", $"Calendar '{name}' ({year}) created.", cal.Id, name);
+
         return cal.Id;
     }
 
@@ -331,6 +335,8 @@ public class MonthViewService
         using var db = _dbFactory.CreateDbContext();
 
         var cal = db.Calendars.First(c => c.Id == calendarId);
+
+        _auditSvc.Log("CalendarDeleted", $"Calendar '{cal.Name}' ({cal.Year}) deleted.", calendarId, cal.Name);
 
         // Cascade should delete days->shifts->slots (based on your FK config)
         db.Calendars.Remove(cal);
