@@ -47,6 +47,13 @@ public partial class AdminWindow : Window
         win.ShowDialog();
     }
 
+    private void PhBulkImport_Click(object sender, RoutedEventArgs e)
+    {
+        var win = _sp.GetRequiredService<PhBulkImportWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+    }
+
     private void PurgeLogs_Click(object sender, RoutedEventArgs e)
     {
         var cutoff = DateTime.Now.AddDays(-30).ToString("dd/MM/yyyy");

@@ -110,6 +110,7 @@ public partial class App : Application
                 services.AddTransient<AdminWindow>();
                 services.AddTransient<SystemInfoWindow>();
                 services.AddTransient<ReplacementReportWindow>();
+                services.AddTransient<PhBulkImportWindow>();
 
                 _serviceProvider = services.BuildServiceProvider();
 
