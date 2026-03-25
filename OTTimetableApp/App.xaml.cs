@@ -109,6 +109,7 @@ public partial class App : Application
                 services.AddTransient<AuditLogWindow>();
                 services.AddTransient<AdminWindow>();
                 services.AddTransient<SystemInfoWindow>();
+                services.AddTransient<ReplacementReportWindow>();
 
                 _serviceProvider = services.BuildServiceProvider();
 
