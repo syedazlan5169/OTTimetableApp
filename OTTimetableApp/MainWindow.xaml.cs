@@ -60,14 +60,11 @@ public partial class MainWindow : Window
         win.ShowDialog();
     }
 
-    private void DatabaseSetup_Click(object sender, RoutedEventArgs e)
+    private void Admin_Click(object sender, RoutedEventArgs e)
     {
-        var win = _sp.GetRequiredService<DatabaseSetupWindow>();
+        var win = _sp.GetRequiredService<AdminWindow>();
         win.Owner = this;
         win.ShowDialog();
-
-        if (win.Saved)
-            MessageBox.Show("Database settings saved. Please restart the app to use the new connection.");
     }
 
     private void Calendar_Changed(object sender, SelectionChangedEventArgs e)
@@ -228,13 +225,6 @@ public partial class MainWindow : Window
             TimetableGrid.ScrollIntoView(todayRow);
             TimetableGrid.SelectedItem = todayRow;
         }
-    }
-
-    private void ViewLogs_Click(object sender, RoutedEventArgs e)
-    {
-        var win = _sp.GetRequiredService<AuditLogWindow>();
-        win.Owner = this;
-        win.ShowDialog();
     }
 
     private void ExportPdf_Click(object sender, RoutedEventArgs e)
