@@ -17,7 +17,20 @@ public partial class EmployeeManagerWindow : Window
         _vm = vm;
         DataContext = _vm;
 
-        Loaded += (_, __) => _vm.Load();
+        Loaded += OnLoaded;
+        Closed += OnClosed;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoaded;
+        _vm.Load();
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        Closed -= OnClosed;
+        DataObject.RemovePastingHandler(this, OnPaste);
     }
 
     private void OnPaste(object sender, DataObjectPastingEventArgs e)

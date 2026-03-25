@@ -14,7 +14,19 @@ public partial class GroupManagerWindow : Window
         _vm = vm;
         DataContext = _vm;
 
-        Loaded += (_, __) => _vm.Load();
+        Loaded += OnLoaded;
+        Closed += OnClosed;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoaded;
+        _vm.Load();
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        Closed -= OnClosed;
     }
 
     private void ApplyCapacity_Click(object sender, RoutedEventArgs e)

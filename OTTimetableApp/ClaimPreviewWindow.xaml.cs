@@ -13,7 +13,20 @@ public partial class ClaimPreviewWindow : Window
         _vm = vm;
         DataContext = _vm;
 
-        Loaded += (_, __) => _vm.LoadLookups();
+        Loaded += OnLoaded;
+        Closed += OnClosed;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoaded;
+        _vm.LoadLookups();
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        Closed -= OnClosed;
+        _vm.Dispose();
     }
 
     private void Generate_Click(object sender, RoutedEventArgs e)

@@ -77,12 +77,17 @@ public partial class App : Application
 
                 services.AddDbContextFactory<AppDbContext>(options =>
                 {
-                    options.UseMySql(cs, serverVersion);
-                });
+                    options.UseMySql(cs, serverVersion, mysqlOptions =>
+                    {
+                        mysqlOptions.EnableRetryOnFailure();
+                    });
+                    options.EnableSensitiveDataLogging(false);
+                    options.EnableDetailedErrors(false);
+                }, ServiceLifetime.Singleton);
 
                 services.AddSingleton<MonthViewService>();
-                services.AddSingleton<MonthViewerVM>();
-                services.AddSingleton<MainWindow>();
+                services.AddTransient<MonthViewerVM>();
+                services.AddTransient<MainWindow>();
                 services.AddSingleton<CalendarGeneratorService2>();
                 services.AddTransient<CalendarManagerWindow>();
                 services.AddSingleton<SlotUpdateService>();
@@ -104,6 +109,7 @@ public partial class App : Application
                 _serviceProvider = services.BuildServiceProvider();
 
                 var mainWindow = Services.GetRequiredService<MainWindow>();
+                MainWindow = mainWindow;
                 mainWindow.Show();
                 break;
             }

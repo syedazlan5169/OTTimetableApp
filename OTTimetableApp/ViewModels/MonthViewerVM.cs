@@ -86,6 +86,12 @@ public partial class MonthViewerVM : ObservableObject
     {
         _svc.SaveSlotChange(shiftSlotId, newActualEmployeeId);
     }
+
+    public void Dispose()
+    {
+        Calendars.Clear();
+        Days.Clear();
+    }
 }
 
 public class MonthOptionVM

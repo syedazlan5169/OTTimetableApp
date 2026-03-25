@@ -7,7 +7,7 @@ using System.IO;
 
 namespace OTTimetableApp.ViewModels;
 
-public partial class ClaimPreviewVM : ObservableObject
+public partial class ClaimPreviewVM : ObservableObject, IDisposable
 {
     private readonly MonthViewService _monthSvc;
     private readonly EmployeeService _empSvc;
@@ -404,6 +404,19 @@ public partial class ClaimPreviewVM : ObservableObject
         }
     }
 
+    private void DetachLineHandlers()
+    {
+        foreach (var line in Lines)
+        {
+            line.PropertyChanged -= Line_PropertyChanged;
+        }
+    }
+
+    public void Dispose()
+    {
+        DetachLineHandlers();
+        Lines.Clear();
+    }
 }
 
 public class EmployeePick

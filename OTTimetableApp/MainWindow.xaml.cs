@@ -38,6 +38,7 @@ public partial class MainWindow : Window
 
         // Scroll to today's date after initial load
         Loaded += MainWindow_Loaded;
+        Closed += MainWindow_Closed;
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -45,6 +46,12 @@ public partial class MainWindow : Window
         // Unsubscribe immediately after first load to prevent memory leaks
         Loaded -= MainWindow_Loaded;
         ScrollToToday();
+    }
+
+    private void MainWindow_Closed(object? sender, EventArgs e)
+    {
+        Closed -= MainWindow_Closed;
+        _vm.Dispose();
     }
     private void CreateClaim_Click(object sender, RoutedEventArgs e)
     {
