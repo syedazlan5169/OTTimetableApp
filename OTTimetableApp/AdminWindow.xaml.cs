@@ -54,6 +54,13 @@ public partial class AdminWindow : Window
         win.ShowDialog();
     }
 
+    private void Stats_Click(object sender, RoutedEventArgs e)
+    {
+        var win = _sp.GetRequiredService<StatsWindow>();
+        win.Owner = this;
+        win.ShowDialog();
+    }
+
     private void ChangePassword_Click(object sender, RoutedEventArgs e)
     {
         var win = _sp.GetRequiredService<ChangePasswordWindow>();

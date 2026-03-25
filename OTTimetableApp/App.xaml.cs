@@ -114,6 +114,7 @@ public partial class App : Application
                 services.AddTransient<PhBulkImportWindow>();
                 services.AddTransient<AdminLoginWindow>();
                 services.AddTransient<ChangePasswordWindow>();
+                services.AddTransient<StatsWindow>();
 
                 _serviceProvider = services.BuildServiceProvider();
 
