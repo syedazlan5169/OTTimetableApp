@@ -265,6 +265,13 @@ public partial class MainWindow : Window
 
             MessageBox.Show($"PDF exported successfully to:\n{saveDialog.FileName}", "Export Successful",
                 MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Open the folder location
+            var folderPath = System.IO.Path.GetDirectoryName(saveDialog.FileName);
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                System.Diagnostics.Process.Start("explorer.exe", folderPath);
+            }
         }
         catch (Exception ex)
         {
