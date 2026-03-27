@@ -15,6 +15,7 @@ public partial class App : Application
     private static ServiceProvider? _serviceProvider;
     public static IServiceProvider Services => _serviceProvider!;
 
+    private readonly SshTunnelService _sshTunnel = new();
     private UnhandledExceptionEventHandler? _domainExceptionHandler;
     private System.Windows.Threading.DispatcherUnhandledExceptionEventHandler? _dispatcherExceptionHandler;
 
@@ -41,6 +42,7 @@ public partial class App : Application
 
         bool EnsureDbReady(AppConfig cfg)
         {
+            _sshTunnel.Start(cfg);
             var cs = cfg.BuildConnectionString();
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseMySql(cs, serverVersion)
@@ -85,6 +87,7 @@ public partial class App : Application
                     options.EnableDetailedErrors(false);
                 }, ServiceLifetime.Singleton);
 
+                services.AddSingleton(_sshTunnel);
                 services.AddSingleton<MonthViewService>();
                 services.AddSingleton<AuditLogService>();
                 services.AddSingleton<AdminAuthService>();
@@ -125,6 +128,7 @@ public partial class App : Application
             }
             catch (Exception ex)
             {
+                _sshTunnel.Stop();
                 MessageBox.Show(ex.Message, "Database error", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 var setup = new DatabaseSetupWindow();
@@ -150,6 +154,8 @@ public partial class App : Application
         // Dispose ServiceProvider to clean up all services and DbContext connections
         _serviceProvider?.Dispose();
         _serviceProvider = null;
+
+        _sshTunnel.Dispose();
 
         base.OnExit(e);
     }
