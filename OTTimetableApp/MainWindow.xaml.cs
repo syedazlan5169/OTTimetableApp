@@ -287,6 +287,7 @@ public partial class MainWindow : Window
 
     private async void Refresh_Click(object sender, RoutedEventArgs e)
     {
+        _vm.InvalidateReferenceData();
         await _vm.LoadMonthAsync();
     }
 
