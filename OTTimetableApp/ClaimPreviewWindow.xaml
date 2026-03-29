@@ -127,7 +127,28 @@
                FontWeight="Bold"
                Text="{Binding GrandTotal, StringFormat=Total Claim: RM {0:N2}}"/>
 
-            <Button Content="Export to Excel" 
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Catatan Lampiran E:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <TextBox Grid.Column="1"
+                         Text="{Binding CatatanLampiranE, UpdateSourceTrigger=PropertyChanged}"
+                         VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="3" Text="Catatan Lampiran A:" VerticalAlignment="Top" Margin="0,2,6,0"/>
+                <TextBox Grid.Column="4"
+                         Text="{Binding CatatanLampiranA, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="40"
+                         VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+
+            <Button Content="Export to Excel"
                     Width="150" 
                     Height="35"
                     Margin="0,15,0,0" 

@@ -26,6 +26,8 @@ public class ExcelExportService
         decimal hourlyRate,
         decimal excessWorkingHours,
         List<ClaimLineVM> claimLines,
+        string catatanLampiranE,
+        string catatanLampiranA,
         string outputPath)
     {
         var baseDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) 
@@ -70,6 +72,10 @@ public class ExcelExportService
 
         // Fill Lebihan Jam Bertugas (Excess Working Hours)
         worksheet.Cell("F18").Value = excessWorkingHours;
+
+        // Fill Catatan fields
+        worksheet.Cell("L20").Value = catatanLampiranE;
+        worksheet.Cell("P18").Value = catatanLampiranA;
 
         // Fill OT claim lines (only checked lines)
         var checkedLines = claimLines.Where(l => l.IsChecked).ToList();

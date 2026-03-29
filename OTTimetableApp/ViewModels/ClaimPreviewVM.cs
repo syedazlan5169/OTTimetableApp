@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OTTimetableApp.Domain.OT;
+using OTTimetableApp.Infrastructure;
 using OTTimetableApp.Services;
 using System.Collections.ObjectModel;
 using Microsoft.Win32;
@@ -27,6 +28,8 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
     public decimal GrandTotal => Claim1125 + Claim125 + Claim15 + Claim175 + Claim20 + ExcessWorkingHoursTotal;
 
     [ObservableProperty] private decimal excessWorkingHours;
+    [ObservableProperty] private string catatanLampiranE;
+    [ObservableProperty] private string catatanLampiranA;
 
     private bool _isBulkUpdating;
 
@@ -73,6 +76,10 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
         _empSvc = empSvc;
         _otSvc = otSvc;
         _excelSvc = excelSvc;
+
+        var settings = ClaimSettings.Load();
+        CatatanLampiranE = settings.CatatanLampiranE;
+        CatatanLampiranA = settings.CatatanLampiranA;
 
         // Auto-select current month when window opens
         SelectedMonth = DateTime.Today.Month;
@@ -392,7 +399,10 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
 
         if (saveDialog.ShowDialog() == true)
         {
-            _excelSvc.ExportClaim(SelectedCalendarId, SelectedMonth, SelectedEmployeeId, HourlyRate, ExcessWorkingHours, checkedLines, saveDialog.FileName);
+            _excelSvc.ExportClaim(SelectedCalendarId, SelectedMonth, SelectedEmployeeId, HourlyRate, ExcessWorkingHours, checkedLines, CatatanLampiranE, CatatanLampiranA, saveDialog.FileName);
+
+            new ClaimSettings { CatatanLampiranE = CatatanLampiranE, CatatanLampiranA = CatatanLampiranA }.Save();
+
             System.Windows.MessageBox.Show("Export successful!", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
 
             // Open the folder location
