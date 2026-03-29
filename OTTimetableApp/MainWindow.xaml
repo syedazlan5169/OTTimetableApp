@@ -5,6 +5,7 @@
         Title="OT Timetable" Height="850" Width="1363" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <converters:GroupIdToColorConverter x:Key="GroupIdToColorConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -532,5 +533,19 @@
 
             </DataGrid.Columns>
         </DataGrid>
+
+        <!-- Loading overlay — visible while IsLoading=true -->
+        <Border Grid.Row="0" Grid.RowSpan="2"
+                Background="#80000000"
+                Panel.ZIndex="99"
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="Loading…"
+                           Foreground="White"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

@@ -24,9 +24,15 @@ public class AppConfig
 
     public string BuildConnectionString()
     {
+        // Keep Alive prevents idle TCP drops on VPS/SSH connections.
+        // Pooling reuses open connections across calendar reloads.
+        const string extra = "Pooling=true;MinimumPoolSize=1;MaximumPoolSize=10;" +
+                             "Connection Timeout=30;Default Command Timeout=60;" +
+                             "Keep Alive=30;";
+
         if (SshEnabled)
-            return $"Server=127.0.0.1;Port={SshLocalPort};Database={Database};User={User};Password={Password};";
-        return $"Server={Host};Database={Database};User={User};Password={Password};";
+            return $"Server=127.0.0.1;Port={SshLocalPort};Database={Database};User={User};Password={Password};{extra}";
+        return $"Server={Host};Database={Database};User={User};Password={Password};{extra}";
     }
 
     public bool IsValid()

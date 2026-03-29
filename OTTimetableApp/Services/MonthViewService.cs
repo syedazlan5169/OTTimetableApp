@@ -10,10 +10,58 @@ public class MonthViewService
     private readonly IDbContextFactory<AppDbContext> _dbFactory;
     private readonly AuditLogService _auditSvc;
 
+    // ── Reference-data cache (employees / groups rarely change) ─────────────
+    private record RefData(
+        List<EmployeeOptionVM> Employees,
+        Dictionary<int, string> EmpNamesById,
+        Dictionary<int, string> GroupNames,
+        List<GroupMember> GroupMembers);
+
+    private RefData? _refCache;
+    private readonly object _refCacheLock = new();
+
     public MonthViewService(IDbContextFactory<AppDbContext> dbFactory, AuditLogService auditSvc)
     {
         _dbFactory = dbFactory;
         _auditSvc = auditSvc;
+    }
+
+    /// <summary>Call after any admin change to employees or groups.</summary>
+    public void InvalidateReferenceCache()
+    {
+        lock (_refCacheLock) { _refCache = null; }
+    }
+
+    private RefData LoadRefData(AppDbContext db)
+    {
+        lock (_refCacheLock)
+        {
+            if (_refCache is not null)
+                return _refCache;
+
+            var employees = db.Employees
+                .AsNoTracking()
+                .Where(e => e.IsActive)
+                .OrderBy(e => e.Name)
+                .Select(e => new EmployeeOptionVM { Id = e.Id, Name = e.Name })
+                .ToList();
+
+            var empNamesById = employees.ToDictionary(x => x.Id, x => x.Name);
+
+            // Blank option at the top (Id=0 represents NULL)
+            employees.Insert(0, new EmployeeOptionVM { Id = 0, Name = "(None)" });
+
+            var groupNames = db.Groups
+                .AsNoTracking()
+                .ToDictionary(g => g.Id, g => g.Name);
+
+            var groupMembers = db.GroupMembers
+                .AsNoTracking()
+                .ToList();
+
+            _refCache = new RefData(employees, empNamesById, groupNames, groupMembers);
+            return _refCache;
+        }
     }
 
     public List<CalendarOptionVM> ListCalendars()
@@ -65,25 +113,30 @@ public class MonthViewService
         return (monthTitle, rows);
     }
 
-    private static List<DayRowVM> LoadMonthRows(AppDbContext db, int calendarId, int month, int year)
+    public async Task<(string MonthTitle, List<DayRowVM> Rows)> LoadMonthAsync(int calendarId, int month)
+    {
+        using var db = _dbFactory.CreateDbContext();
+
+        var cal = await db.Calendars
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == calendarId)
+            .ConfigureAwait(false);
+
+        if (cal == null)
+            return ("", new List<DayRowVM>());
+
+        var monthTitle = new DateTime(cal.Year, month, 1).ToString("MMMM yyyy");
+        var rows = await LoadMonthRowsAsync(db, calendarId, month, cal.Year).ConfigureAwait(false);
+
+        return (monthTitle, rows);
+    }
+
+    private List<DayRowVM> LoadMonthRows(AppDbContext db, int calendarId, int month, int year)
     {
         var start = new DateOnly(year, month, 1);
         var end = start.AddMonths(1).AddDays(-1);
 
-        var employees = db.Employees
-            .AsNoTracking()
-            .Where(e => e.IsActive)
-            .OrderBy(e => e.Name)
-            .Select(e => new EmployeeOptionVM { Id = e.Id, Name = e.Name })
-            .ToList();
-
-        var empNameById = employees
-            .Where(x => x.Id != 0)
-            .ToDictionary(x => x.Id, x => x.Name);
-
-        // Add a blank option at the top (Id=0 will represent NULL)
-        employees.Insert(0, new EmployeeOptionVM { Id = 0, Name = "(None)" });
-
+        var refData = LoadRefData(db);
 
         var days = db.CalendarDays
             .AsNoTracking()
@@ -91,33 +144,85 @@ public class MonthViewService
             .OrderBy(d => d.Date)
             .ToList();
 
-        var groupNames = db.Groups
-            .AsNoTracking()
-            .ToDictionary(g => g.Id, g => g.Name);
-
-        var groupMembers = db.GroupMembers
-            .AsNoTracking()
-            .ToList();
+        if (days.Count == 0)
+            return new List<DayRowVM>();
 
         var dayIds = days.Select(d => d.Id).ToList();
 
-        var shifts = db.ShiftAssignments
-            .AsNoTracking()
-            .Where(s => dayIds.Contains(s.CalendarDayId))
-            .ToList();
-
-        var shiftIds = shifts.Select(s => s.Id).ToList();
-
+        // Single JOIN query — replaces the previous two separate IN-list queries
         var slots = db.ShiftSlots
             .AsNoTracking()
-            .Where(sl => shiftIds.Contains(sl.ShiftAssignmentId))
+            .Include(sl => sl.ShiftAssignment)
+            .Where(sl => dayIds.Contains(sl.ShiftAssignment.CalendarDayId))
             .OrderBy(sl => sl.SlotIndex)
             .ToList();
 
-        var shiftsByDay = shifts.GroupBy(s => s.CalendarDayId).ToDictionary(g => g.Key, g => g.ToList());
-        var slotsByShift = slots.GroupBy(sl => sl.ShiftAssignmentId).ToDictionary(g => g.Key, g => g.ToList());
+        var shiftsByDay = slots
+            .Select(sl => sl.ShiftAssignment)
+            .DistinctBy(s => s.Id)
+            .GroupBy(s => s.CalendarDayId)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
-        var result = new List<DayRowVM>();
+        var slotsByShift = slots
+            .GroupBy(sl => sl.ShiftAssignmentId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        return BuildRows(days, shiftsByDay, slotsByShift, refData);
+    }
+
+    private async Task<List<DayRowVM>> LoadMonthRowsAsync(AppDbContext db, int calendarId, int month, int year)
+    {
+        var start = new DateOnly(year, month, 1);
+        var end = start.AddMonths(1).AddDays(-1);
+
+        var refData = LoadRefData(db);
+
+        var days = await db.CalendarDays
+            .AsNoTracking()
+            .Where(d => d.CalendarId == calendarId && d.Date >= start && d.Date <= end)
+            .OrderBy(d => d.Date)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        if (days.Count == 0)
+            return new List<DayRowVM>();
+
+        var dayIds = days.Select(d => d.Id).ToList();
+
+        // Single JOIN query — replaces the previous two separate IN-list queries
+        var slots = await db.ShiftSlots
+            .AsNoTracking()
+            .Include(sl => sl.ShiftAssignment)
+            .Where(sl => dayIds.Contains(sl.ShiftAssignment.CalendarDayId))
+            .OrderBy(sl => sl.SlotIndex)
+            .ToListAsync()
+            .ConfigureAwait(false);
+
+        var shiftsByDay = slots
+            .Select(sl => sl.ShiftAssignment)
+            .DistinctBy(s => s.Id)
+            .GroupBy(s => s.CalendarDayId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var slotsByShift = slots
+            .GroupBy(sl => sl.ShiftAssignmentId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        return BuildRows(days, shiftsByDay, slotsByShift, refData);
+    }
+
+    private static List<DayRowVM> BuildRows(
+        List<CalendarDay> days,
+        Dictionary<int, List<ShiftAssignment>> shiftsByDay,
+        Dictionary<int, List<ShiftSlot>> slotsByShift,
+        RefData refData)
+    {
+        var employees = refData.Employees;
+        var empNamesById = refData.EmpNamesById;
+        var groupNames = refData.GroupNames;
+        var groupMembers = refData.GroupMembers;
+
+        var result = new List<DayRowVM>(days.Count);
 
         foreach (var d in days)
         {
@@ -155,16 +260,14 @@ public class MonthViewService
 
                     if (slotsByShift.TryGetValue(sh.Id, out var shSlots))
                     {
-
                         var usedIds = shSlots
-                        .Select(x => x.ActualEmployeeId)
-                        .Where(x => x.HasValue && x.Value != 0)
-                        .Select(x => x!.Value)
-                        .ToHashSet();
+                            .Select(x => x.ActualEmployeeId)
+                            .Where(x => x.HasValue && x.Value != 0)
+                            .Select(x => x!.Value)
+                            .ToHashSet();
 
                         foreach (var sl in shSlots)
                         {
-
                             // For this slot, allow its own current selection (so it doesn't disable itself)
                             var usedExceptSelf = usedIds.ToHashSet();
                             if (sl.ActualEmployeeId.HasValue && sl.ActualEmployeeId.Value != 0)
@@ -191,7 +294,7 @@ public class MonthViewService
                             string? replacesName = null;
                             if (sl.FillType == SlotFillType.Replacement && sl.ReplacedEmployeeId.HasValue)
                             {
-                                if (empNameById.TryGetValue(sl.ReplacedEmployeeId.Value, out var n))
+                                if (empNamesById.TryGetValue(sl.ReplacedEmployeeId.Value, out var n))
                                     replacesName = n;
                                 else
                                     replacesName = "(UNKNOWN)";
@@ -200,7 +303,7 @@ public class MonthViewService
                             string? onLeaveName = null;
                             if (sl.FillType == SlotFillType.Empty && sl.PlannedEmployeeId.HasValue)
                             {
-                                if (empNameById.TryGetValue(sl.PlannedEmployeeId.Value, out var n))
+                                if (empNamesById.TryGetValue(sl.PlannedEmployeeId.Value, out var n))
                                     onLeaveName = n;
                                 else
                                     onLeaveName = "(UNKNOWN)";

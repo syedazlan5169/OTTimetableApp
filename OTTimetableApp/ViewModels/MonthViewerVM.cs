@@ -38,6 +38,9 @@ public partial class MonthViewerVM : ObservableObject
     [ObservableProperty]
     private string monthTitle = "";
 
+    [ObservableProperty]
+    private bool isLoading;
+
     public ObservableCollection<DayRowVM> Days { get; } = new();
 
     public void LoadCalendars()
@@ -76,6 +79,28 @@ public partial class MonthViewerVM : ObservableObject
         foreach (var r in payload.Rows)
             Days.Add(r);
     }
+
+    public async Task LoadMonthAsync()
+    {
+        if (SelectedCalendarId == 0) return;
+
+        IsLoading = true;
+        try
+        {
+            var payload = await _svc.LoadMonthAsync(SelectedCalendarId, SelectedMonth);
+
+            MonthTitle = payload.MonthTitle;
+            Days.Clear();
+            foreach (var r in payload.Rows)
+                Days.Add(r);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public void InvalidateReferenceData() => _svc.InvalidateReferenceCache();
 
     public void SavePH(int calendarDayId, bool isPh, string? phName)
     {

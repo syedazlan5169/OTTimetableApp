@@ -73,17 +73,17 @@ public partial class MainWindow : Window
         adminWin.ShowDialog();
     }
 
-    private void Calendar_Changed(object sender, SelectionChangedEventArgs e)
+    private async void Calendar_Changed(object sender, SelectionChangedEventArgs e)
     {
-        _vm.LoadMonth();
+        await _vm.LoadMonthAsync();
     }
 
-    private void Month_Changed(object sender, SelectionChangedEventArgs e)
+    private async void Month_Changed(object sender, SelectionChangedEventArgs e)
     {
-        _vm.LoadMonth();
+        await _vm.LoadMonthAsync();
     }
 
-    private void PH_Changed(object sender, RoutedEventArgs e)
+    private async void PH_Changed(object sender, RoutedEventArgs e)
     {
         if (sender is not FrameworkElement fe) return;
         if (fe.DataContext is not DayRowVM day) return;
@@ -97,10 +97,10 @@ public partial class MainWindow : Window
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        _vm.LoadMonth();
+        await _vm.LoadMonthAsync();
     }
 
-    private void PHName_LostFocus(object sender, RoutedEventArgs e)
+    private async void PHName_LostFocus(object sender, RoutedEventArgs e)
     {
         if (sender is not FrameworkElement fe) return;
         if (fe.DataContext is not DayRowVM day) return;
@@ -114,7 +114,7 @@ public partial class MainWindow : Window
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        _vm.LoadMonth();
+        await _vm.LoadMonthAsync();
     }
 
     private void PH_Click(object sender, RoutedEventArgs e)
@@ -132,7 +132,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void Slot_DropDownClosed(object sender, EventArgs e)
+    private async void Slot_DropDownClosed(object sender, EventArgs e)
     {
         if (sender is not ComboBox cb) return;
         if (cb.DataContext is not ShiftSlotVM slotVm) return;
@@ -144,16 +144,16 @@ public partial class MainWindow : Window
 
             _slotSvc.UpdateSlot(slotVm.ShiftSlotId, selected);
 
-            _vm.LoadMonth();
+            await _vm.LoadMonthAsync();
         }
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            _vm.LoadMonth();
+            await _vm.LoadMonthAsync();
         }
     }
 
-    private void ManageCalendars_Click(object sender, RoutedEventArgs e)
+    private async void ManageCalendars_Click(object sender, RoutedEventArgs e)
     {
         var win = App.Services.GetRequiredService<CalendarManagerWindow>();
         win.Owner = this;
@@ -161,27 +161,29 @@ public partial class MainWindow : Window
 
         // Reload calendars after closing manager
         _vm.LoadCalendars();
-        _vm.LoadMonth();
+        await _vm.LoadMonthAsync();
     }
 
-    private void ManageEmployees_Click(object sender, RoutedEventArgs e)
+    private async void ManageEmployees_Click(object sender, RoutedEventArgs e)
     {
         var win = App.Services.GetRequiredService<EmployeeManagerWindow>();
         win.Owner = this;
         win.ShowDialog();
 
-        // reload month view after employee edits (names/options might change)
-        _vm.LoadMonth();
+        // Employee names/options may have changed — force cache refresh
+        _vm.InvalidateReferenceData();
+        await _vm.LoadMonthAsync();
     }
 
-    private void ManageGroups_Click(object sender, RoutedEventArgs e)
+    private async void ManageGroups_Click(object sender, RoutedEventArgs e)
     {
         var win = App.Services.GetRequiredService<GroupManagerWindow>();
         win.Owner = this;
         win.ShowDialog();
 
-        // Group membership changes affect new calendars only, but also affect dropdown options in timetable
-        _vm.LoadMonth();
+        // Group membership may have changed — force cache refresh
+        _vm.InvalidateReferenceData();
+        await _vm.LoadMonthAsync();
     }
 
     private void DebugClaim_Click(object sender, RoutedEventArgs e)
