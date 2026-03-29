@@ -284,4 +284,40 @@ public partial class MainWindow : Window
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
+    private async void Refresh_Click(object sender, RoutedEventArgs e)
+    {
+        await _vm.LoadMonthAsync();
+    }
+
+    private async void ResetMonth_Click(object sender, RoutedEventArgs e)
+    {
+        if (_vm.SelectedCalendarId == 0)
+        {
+            MessageBox.Show("Select a calendar first.", "No Calendar Selected",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            $"Reset all slot assignments for {_vm.MonthTitle}?\n\n" +
+            "• All replacements and fill-ins will be reverted to planned.\n" +
+            "• Public holiday flags are kept.\n" +
+            "• This cannot be undone.",
+            "Confirm Reset",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirm != MessageBoxResult.Yes) return;
+
+        try
+        {
+            await _vm.ResetMonthAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Reset failed:\n{ex.Message}", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 }

@@ -102,6 +102,27 @@ public partial class MonthViewerVM : ObservableObject
 
     public void InvalidateReferenceData() => _svc.InvalidateReferenceCache();
 
+    public async Task ResetMonthAsync()
+    {
+        if (SelectedCalendarId == 0) return;
+
+        IsLoading = true;
+        try
+        {
+            await Task.Run(() => _svc.ResetMonth(SelectedCalendarId, SelectedMonth));
+            var payload = await _svc.LoadMonthAsync(SelectedCalendarId, SelectedMonth);
+
+            MonthTitle = payload.MonthTitle;
+            Days.Clear();
+            foreach (var r in payload.Rows)
+                Days.Add(r);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
     public void SavePH(int calendarDayId, bool isPh, string? phName)
     {
         _svc.SavePublicHoliday(calendarDayId, isPh, phName);

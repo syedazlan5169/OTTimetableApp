@@ -69,11 +69,37 @@
 
             </StackPanel>
 
-            <TextBlock Text="{Binding MonthTitle}"
-                       FontSize="26"
-                       FontWeight="Bold"
-                       HorizontalAlignment="Center"
-                       Margin="0,10,0,0"/>
+            <Grid Margin="0,8,0,0">
+                <!-- Left: Refresh + Reset Month -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                    <Button Width="30"
+                            Height="28"
+                            Click="Refresh_Click"
+                            ToolTip="Reload calendar">
+                        <TextBlock Text="&#xE72C;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="14"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"/>
+                    </Button>
+                    <Button Content="Reset Month"
+                            Width="110"
+                            Height="28"
+                            Margin="6,0,0,0"
+                            Click="ResetMonth_Click"
+                            Background="#FFCDD2"
+                            ToolTip="Revert all slot assignments for the current month back to planned. Public holidays are kept."/>
+                </StackPanel>
+
+                <!-- Centre: month title -->
+                <TextBlock Text="{Binding MonthTitle}"
+                           FontSize="26"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Grid>
         </StackPanel>
 
         <!-- Timetable grid (month only) -->

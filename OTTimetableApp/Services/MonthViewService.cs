@@ -400,6 +400,50 @@ public class MonthViewService
         db.SaveChanges();
     }
 
+    public void ResetMonth(int calendarId, int month)
+    {
+        using var db = _dbFactory.CreateDbContext();
+
+        var cal = db.Calendars.AsNoTracking().FirstOrDefault(c => c.Id == calendarId);
+        if (cal == null) return;
+
+        var start = new DateOnly(cal.Year, month, 1);
+        var end = start.AddMonths(1).AddDays(-1);
+
+        var dayIds = db.CalendarDays
+            .AsNoTracking()
+            .Where(d => d.CalendarId == calendarId && d.Date >= start && d.Date <= end)
+            .Select(d => d.Id)
+            .ToList();
+
+        if (dayIds.Count == 0) return;
+
+        var shiftIds = db.ShiftAssignments
+            .AsNoTracking()
+            .Where(s => dayIds.Contains(s.CalendarDayId))
+            .Select(s => s.Id)
+            .ToList();
+
+        if (shiftIds.Count == 0) return;
+
+        var slots = db.ShiftSlots
+            .Where(sl => shiftIds.Contains(sl.ShiftAssignmentId))
+            .ToList();
+
+        foreach (var slot in slots)
+        {
+            slot.ActualEmployeeId = slot.PlannedEmployeeId;
+            slot.ReplacedEmployeeId = null;
+            slot.FillType = slot.PlannedEmployeeId == null ? SlotFillType.Empty : SlotFillType.Planned;
+        }
+
+        db.SaveChanges();
+
+        _auditSvc.Log("MonthReset",
+            $"Month {new DateTime(cal.Year, month, 1):MMMM yyyy} reset to planned assignments.",
+            calendarId, cal.Name);
+    }
+
     public List<Group> ListGroups()
     {
         using var db = _dbFactory.CreateDbContext();
