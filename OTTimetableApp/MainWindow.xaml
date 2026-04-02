@@ -5,6 +5,8 @@
         Title="OT Timetable" Height="850" Width="1363" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <converters:GroupIdToColorConverter x:Key="GroupIdToColorConverter"/>
+        <converters:EmployeeHighlightConverter x:Key="EmployeeHighlightConverter"/>
+        <converters:EmployeeNameHighlightConverter x:Key="EmployeeNameHighlightConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
     <Grid Margin="12">
@@ -91,6 +93,18 @@
                             Click="ResetMonth_Click"
                             Background="#FFCDD2"
                             ToolTip="Revert all slot assignments for the current month back to planned. Public holidays are kept."/>
+
+                    <!-- Highlighter -->
+                    <TextBlock Text="Highlight:"
+                               VerticalAlignment="Center"
+                               Margin="16,0,6,0"/>
+                    <ComboBox Width="180"
+                              Height="28"
+                              ItemsSource="{Binding HighlighterEmployees}"
+                              DisplayMemberPath="Name"
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding HighlightedEmployeeId}"
+                              ToolTip="Select an employee to highlight their shifts on the calendar"/>
                 </StackPanel>
 
                 <!-- Centre: month title -->
@@ -198,6 +212,12 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Margin="0,2">
+                                                <StackPanel.Background>
+                                                    <MultiBinding Converter="{StaticResource EmployeeHighlightConverter}">
+                                                        <Binding Path="ActualEmployeeId"/>
+                                                        <Binding Path="DataContext.HighlightedEmployeeId" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                    </MultiBinding>
+                                                </StackPanel.Background>
                                                 <DockPanel>
                                                     <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
 
@@ -305,6 +325,12 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Margin="0,2">
+                                                <StackPanel.Background>
+                                                    <MultiBinding Converter="{StaticResource EmployeeHighlightConverter}">
+                                                        <Binding Path="ActualEmployeeId"/>
+                                                        <Binding Path="DataContext.HighlightedEmployeeId" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                    </MultiBinding>
+                                                </StackPanel.Background>
                                                 <DockPanel>
                                                     <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
 
@@ -412,6 +438,12 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Margin="0,2">
+                                                <StackPanel.Background>
+                                                    <MultiBinding Converter="{StaticResource EmployeeHighlightConverter}">
+                                                        <Binding Path="ActualEmployeeId"/>
+                                                        <Binding Path="DataContext.HighlightedEmployeeId" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                    </MultiBinding>
+                                                </StackPanel.Background>
                                                 <DockPanel>
                                                     <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
 
@@ -522,12 +554,17 @@
                                 <ItemsControl ItemsSource="{Binding OffGroupMembers}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="#FAFAFA"
-                                                    BorderBrush="#E0E0E0"
+                                            <Border BorderBrush="#E0E0E0"
                                                     BorderThickness="0.5"
                                                     CornerRadius="3"
                                                     Padding="8,4"
                                                     Margin="0,2">
+                                                <Border.Background>
+                                                    <MultiBinding Converter="{StaticResource EmployeeNameHighlightConverter}">
+                                                        <Binding/>
+                                                        <Binding Path="DataContext.HighlightedEmployeeName" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                    </MultiBinding>
+                                                </Border.Background>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>

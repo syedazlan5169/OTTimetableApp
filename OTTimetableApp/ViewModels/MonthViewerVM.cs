@@ -41,6 +41,19 @@ public partial class MonthViewerVM : ObservableObject
     [ObservableProperty]
     private bool isLoading;
 
+    [ObservableProperty]
+    private int highlightedEmployeeId;
+
+    [ObservableProperty]
+    private string highlightedEmployeeName = "";
+
+    public ObservableCollection<EmployeeOptionVM> HighlighterEmployees { get; } = new();
+
+    partial void OnHighlightedEmployeeIdChanged(int value)
+    {
+        HighlightedEmployeeName = HighlighterEmployees.FirstOrDefault(e => e.Id == value)?.Name ?? "";
+    }
+
     public ObservableCollection<DayRowVM> Days { get; } = new();
 
     public void LoadCalendars()
@@ -78,6 +91,8 @@ public partial class MonthViewerVM : ObservableObject
         Days.Clear();
         foreach (var r in payload.Rows)
             Days.Add(r);
+
+        RebuildHighlighterEmployees();
     }
 
     public async Task LoadMonthAsync()
@@ -93,6 +108,8 @@ public partial class MonthViewerVM : ObservableObject
             Days.Clear();
             foreach (var r in payload.Rows)
                 Days.Add(r);
+
+            RebuildHighlighterEmployees();
         }
         finally
         {
@@ -101,6 +118,29 @@ public partial class MonthViewerVM : ObservableObject
     }
 
     public void InvalidateReferenceData() => _svc.InvalidateReferenceCache();
+
+    private void RebuildHighlighterEmployees()
+    {
+        var previousId = HighlightedEmployeeId;
+
+        HighlighterEmployees.Clear();
+        HighlighterEmployees.Add(new EmployeeOptionVM { Id = 0, Name = "(None)" });
+
+        var allOptions = Days
+            .SelectMany(d => new[] { d.Night, d.Morning, d.Evening })
+            .SelectMany(s => s.Slots)
+            .SelectMany(sl => sl.EmployeeOptions)
+            .Where(o => o.Id > 0)
+            .GroupBy(o => o.Id)
+            .Select(g => g.First())
+            .OrderBy(o => o.Name);
+
+        foreach (var opt in allOptions)
+            HighlighterEmployees.Add(new EmployeeOptionVM { Id = opt.Id, Name = opt.Name });
+
+        if (!HighlighterEmployees.Any(e => e.Id == previousId))
+            HighlightedEmployeeId = 0;
+    }
 
     public async Task ResetMonthAsync()
     {
@@ -116,6 +156,8 @@ public partial class MonthViewerVM : ObservableObject
             Days.Clear();
             foreach (var r in payload.Rows)
                 Days.Add(r);
+
+            RebuildHighlighterEmployees();
         }
         finally
         {
