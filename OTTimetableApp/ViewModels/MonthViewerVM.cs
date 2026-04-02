@@ -47,11 +47,15 @@ public partial class MonthViewerVM : ObservableObject
     [ObservableProperty]
     private string highlightedEmployeeName = "";
 
+    [ObservableProperty]
+    private int highlightedEmployeeCount;
+
     public ObservableCollection<EmployeeOptionVM> HighlighterEmployees { get; } = new();
 
     partial void OnHighlightedEmployeeIdChanged(int value)
     {
         HighlightedEmployeeName = HighlighterEmployees.FirstOrDefault(e => e.Id == value)?.Name ?? "";
+        HighlightedEmployeeCount = CountHighlightedSlots(value);
     }
 
     public ObservableCollection<DayRowVM> Days { get; } = new();
@@ -140,6 +144,18 @@ public partial class MonthViewerVM : ObservableObject
 
         if (!HighlighterEmployees.Any(e => e.Id == previousId))
             HighlightedEmployeeId = 0;
+
+        HighlightedEmployeeCount = CountHighlightedSlots(HighlightedEmployeeId);
+    }
+
+    private int CountHighlightedSlots(int employeeId)
+    {
+        if (employeeId == 0) return 0;
+
+        return Days
+            .SelectMany(d => new[] { d.Night, d.Morning, d.Evening })
+            .SelectMany(s => s.Slots)
+            .Count(sl => sl.ActualEmployeeId == employeeId);
     }
 
     public async Task ResetMonthAsync()

@@ -105,6 +105,26 @@
                               SelectedValuePath="Id"
                               SelectedValue="{Binding HighlightedEmployeeId}"
                               ToolTip="Select an employee to highlight their shifts on the calendar"/>
+                    <Border CornerRadius="10"
+                            Padding="8,3"
+                            Margin="6,0,0,0"
+                            VerticalAlignment="Center">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#E65100"/>
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HighlightedEmployeeId}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Foreground="White"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   Text="{Binding HighlightedEmployeeCount, StringFormat={}{0} shift(s)}"/>
+                    </Border>
                 </StackPanel>
 
                 <!-- Centre: month title -->
