@@ -219,7 +219,19 @@
                                                     </MultiBinding>
                                                 </StackPanel.Background>
                                                 <DockPanel>
-                                                    <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
+                                                    <Border Width="20" Height="20" CornerRadius="10"
+                                                            BorderThickness="1.5" VerticalAlignment="Center">
+                                                        <Border.BorderBrush>
+                                                            <MultiBinding Converter="{StaticResource EmployeeHighlightConverter}" ConverterParameter="circle">
+                                                                <Binding Path="ActualEmployeeId"/>
+                                                                <Binding Path="DataContext.HighlightedEmployeeId" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                            </MultiBinding>
+                                                        </Border.BorderBrush>
+                                                        <TextBlock Text="{Binding SlotIndex}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   FontWeight="SemiBold"/>
+                                                    </Border>
 
                                                     <!-- Status badge -->
                                                     <Border Width="72" Height="22" CornerRadius="6"
@@ -332,7 +344,19 @@
                                                     </MultiBinding>
                                                 </StackPanel.Background>
                                                 <DockPanel>
-                                                    <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
+                                                    <Border Width="20" Height="20" CornerRadius="10"
+                                                            BorderThickness="1.5" VerticalAlignment="Center">
+                                                        <Border.BorderBrush>
+                                                            <MultiBinding Converter="{StaticResource EmployeeHighlightConverter}" ConverterParameter="circle">
+                                                                <Binding Path="ActualEmployeeId"/>
+                                                                <Binding Path="DataContext.HighlightedEmployeeId" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                            </MultiBinding>
+                                                        </Border.BorderBrush>
+                                                        <TextBlock Text="{Binding SlotIndex}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   FontWeight="SemiBold"/>
+                                                    </Border>
 
                                                     <!-- Status badge -->
                                                     <Border Width="72" Height="22" CornerRadius="6"
@@ -445,7 +469,19 @@
                                                     </MultiBinding>
                                                 </StackPanel.Background>
                                                 <DockPanel>
-                                                    <TextBlock Text="{Binding SlotIndex}" Width="20" VerticalAlignment="Center"/>
+                                                    <Border Width="20" Height="20" CornerRadius="10"
+                                                            BorderThickness="1.5" VerticalAlignment="Center">
+                                                        <Border.BorderBrush>
+                                                            <MultiBinding Converter="{StaticResource EmployeeHighlightConverter}" ConverterParameter="circle">
+                                                                <Binding Path="ActualEmployeeId"/>
+                                                                <Binding Path="DataContext.HighlightedEmployeeId" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                                            </MultiBinding>
+                                                        </Border.BorderBrush>
+                                                        <TextBlock Text="{Binding SlotIndex}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   FontWeight="SemiBold"/>
+                                                    </Border>
 
                                                     <!-- Status badge -->
                                                     <Border Width="72" Height="22" CornerRadius="6"
