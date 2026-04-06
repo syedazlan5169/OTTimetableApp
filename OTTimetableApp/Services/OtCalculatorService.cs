@@ -289,14 +289,18 @@ public class OtCalculatorService
         DateOnly start,
         DateOnly end)
     {
+        var firstDayOfNextMonth = end.AddDays(1);
+
         var days = db.CalendarDays
             .AsNoTracking()
-            .Where(d => d.CalendarId == calendarId && d.Date >= start && d.Date <= end)
+            .Where(d => d.CalendarId == calendarId && d.Date >= start && d.Date <= firstDayOfNextMonth)
             .ToList();
+
+        var dayByDate = days.ToDictionary(d => d.Date);
 
         decimal totalHours = 0m;
 
-        foreach (var day in days)
+        foreach (var day in days.Where(d => d.Date <= end))
         {
             // Count shift hours for this group
             if (day.MorningGroupId == groupId)
@@ -308,6 +312,18 @@ public class OtCalculatorService
             if (day.NightGroupId == groupId)
                 totalHours += 9m; // Night: 22:00-07:00 = 9 hours
         }
+
+        // Edge case 1: first day of month is a night shift row (NightGroupId on day 1).
+        // That shift runs 22:00 (prev month last day) -> 07:00 (day 1).
+        // The 2 hours from 22:00-00:00 belong to the previous month, so deduct them.
+        if (dayByDate.TryGetValue(start, out var firstDay) && firstDay.NightGroupId == groupId)
+            totalHours -= 2m;
+
+        // Edge case 2: the first day of the next month is a night shift row for this group.
+        // That shift runs 22:00 (last day of current month) -> 07:00 (next month day 1).
+        // The 2 hours from 22:00-00:00 fall in the current month, so add them.
+        if (dayByDate.TryGetValue(firstDayOfNextMonth, out var nextMonthFirstDay) && nextMonthFirstDay.NightGroupId == groupId)
+            totalHours += 2m;
 
         return totalHours;
     }
