@@ -58,6 +58,19 @@ public class ExcelExportService
         var monthName = GetMalayMonthName(month);
         worksheet.Cell("A5").Value = $"{monthName} {year}".ToUpper();
 
+        // Fill month start/end dates
+        try
+        {
+            var startDate = new DateOnly(year, month, 1);
+            var endDate = new DateOnly(year, month, DateTime.DaysInMonth(year, month));
+            worksheet.Cell("M18").Value = startDate.ToString("dd/MM/yyyy");
+            worksheet.Cell("M19").Value = endDate.ToString("dd/MM/yyyy");
+        }
+        catch
+        {
+            // ignore
+        }
+
         // Fill employee information
         worksheet.Cell("C8").Value = employee.FullName?.ToUpper();
         worksheet.Cell("C9").Value = employee.IcNo?.ToUpper();
@@ -73,9 +86,47 @@ public class ExcelExportService
         // Fill Lebihan Jam Bertugas (Excess Working Hours)
         worksheet.Cell("F18").Value = excessWorkingHours;
 
+        // Fill A18 with group label: "LEBIHAN JAM BERTUGAS KUMPULAN {?}"
+        try
+        {
+            var baseGroupMap = _employeeService.GetBaseGroupMap();
+            string groupLabel = string.Empty;
+
+            if (baseGroupMap != null && baseGroupMap.TryGetValue(employeeId, out var groupId))
+            {
+                var groups = _employeeService.GetGroups();
+                var group = groups.FirstOrDefault(g => g.Id == groupId);
+                if (group != null)
+                {
+                    var name = group.Name?.Trim() ?? string.Empty;
+                    if (name.StartsWith("KUMPULAN ", StringComparison.OrdinalIgnoreCase))
+                        groupLabel = name.Substring("KUMPULAN ".Length).Trim();
+                    else if (name.StartsWith("KUMPULAN", StringComparison.OrdinalIgnoreCase))
+                        groupLabel = name.Substring("KUMPULAN".Length).Trim();
+                    else
+                        groupLabel = name;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(groupLabel))
+            {
+                worksheet.Cell("A18").Value = $"LEBIHAN JAM BERTUGAS KUMPULAN {groupLabel}".ToUpper();
+                worksheet.Cell("R19").Value = $"KUMPULAN {groupLabel} ({excessWorkingHours} JAM)".ToUpper();
+            }
+            else
+            {
+                worksheet.Cell("A18").Value = "LEBIHAN JAM BERTUGAS";
+                worksheet.Cell("R19").Value = $"KUMPULAN ({excessWorkingHours} JAM)".ToUpper();
+            }
+        }
+        catch
+        {
+            // Ignore and leave cell as default if anything fails
+        }
+
         // Fill Catatan fields
         worksheet.Cell("L20").Value = catatanLampiranE;
-        worksheet.Cell("P18").Value = catatanLampiranA;
+        worksheet.Cell("P20").Value = catatanLampiranA;
 
         // Fill OT claim lines (only checked lines)
         var checkedLines = claimLines.Where(l => l.IsChecked).ToList();
@@ -157,9 +208,9 @@ public class ExcelExportService
         if (line.H20.HasValue && line.H20.Value > 0)
             worksheet.Cell(row, 11).Value = line.H20.Value; // Column K
 
-        // Column R: Remark (2 rows above the OT line)
+        // Column R: Remark (inline with the OT line)
         if (!string.IsNullOrWhiteSpace(line.Remark))
-            worksheet.Cell(row - 2, 18).Value = line.Remark?.ToUpper(); // Column R
+            worksheet.Cell(row, 18).Value = line.Remark?.ToUpper(); // Column R
     }
 
     private static string GetMalayDayName(DayOfWeek dayOfWeek)
