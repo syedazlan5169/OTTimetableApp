@@ -99,10 +99,8 @@
         </DataGrid>
         <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,10,0,0">
 
-            <TextBlock Text="{Binding HourlyRate, StringFormat=Hourly Rate: RM {0:N2}}"
-               FontWeight="Bold"/>
-
-            <Grid Margin="0,6,0,0">
+            <!-- First row: totals for each rate -->
+            <Grid Margin="0,0,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="150"/>
                     <ColumnDefinition Width="150"/>
@@ -110,21 +108,34 @@
                     <ColumnDefinition Width="150"/>
                     <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Text="{Binding Total1125, StringFormat=1.125 Hours: {0:N2}}"/>
-                <TextBlock Grid.Column="1" Text="{Binding Total125, StringFormat=1.25 Hours: {0:N2}}"/>
-                <TextBlock Grid.Column="2" Text="{Binding Total15, StringFormat=1.5 Hours: {0:N2}}"/>
-                <TextBlock Grid.Column="3" Text="{Binding Total175, StringFormat=1.75 Hours: {0:N2}}"/>
-                <TextBlock Grid.Column="4" Text="{Binding Total20, StringFormat=2.0 Hours: {0:N2}}"/>
+                <TextBlock Grid.Column="0" Text="{Binding Total1125, StringFormat=1.125 Hours: {0:N2}}" Foreground="DarkBlue"/>
+                <TextBlock Grid.Column="1" Text="{Binding Total125, StringFormat=1.25 Hours: {0:N2}}" Foreground="DarkBlue"/>
+                <TextBlock Grid.Column="2" Text="{Binding Total15, StringFormat=1.5 Hours: {0:N2}}" Foreground="DarkBlue"/>
+                <TextBlock Grid.Column="3" Text="{Binding Total175, StringFormat=1.75 Hours: {0:N2}}" Foreground="DarkBlue"/>
+                <TextBlock Grid.Column="4" Text="{Binding Total20, StringFormat=2.0 Hours: {0:N2}}" Foreground="DarkBlue"/>
             </Grid>
 
-            <TextBlock Margin="0,8,0,0"
-               FontWeight="Bold"
-               Text="{Binding ExcessWorkingHours, StringFormat=Lebihan Jam Bertugas: {0:N2} hours}"/>
+            <!-- Second row: Hourly Rate, Excess Working Hours, Total Hours Claim -->
+            <Grid Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
+                <TextBlock Grid.Column="0" Text="{Binding HourlyRate, StringFormat=Hourly Rate: RM {0:N2}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="DarkGreen" />
+                <TextBlock Grid.Column="2" Margin="6,0,0,0" Text="{Binding ExcessWorkingHours, StringFormat=Lebihan Jam Bertugas: {0:N2} hours}" FontWeight="Bold" VerticalAlignment="Center" Foreground="DarkGreen" />
+                <TextBlock Grid.Column="4" Margin="12,0,0,0" Text="{Binding TotalHoursOTDisplay, StringFormat=Total Hours Claim: {0}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="DarkGreen" />
+            </Grid>
+
+            <!-- Last row: Grand Total -->
             <TextBlock Margin="0,8,0,0"
                FontSize="16"
                FontWeight="Bold"
+               Foreground="DarkRed"
                Text="{Binding GrandTotal, StringFormat=Total Claim: RM {0:N2}}"/>
 
             <Grid Margin="0,12,0,0">

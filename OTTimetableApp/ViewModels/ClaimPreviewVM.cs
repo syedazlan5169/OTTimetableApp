@@ -26,6 +26,16 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
     public decimal Claim20 => Total20 * 2.0m * HourlyRate;
     public decimal ExcessWorkingHoursTotal => ExcessWorkingHours * 1.25m * HourlyRate;
     public decimal GrandTotal => Claim1125 + Claim125 + Claim15 + Claim175 + Claim20 + ExcessWorkingHoursTotal;
+    public decimal TotalHoursOT => Total1125 + Total125 + Total15 + Total175 + Total20 + ExcessWorkingHours;
+    public decimal TotalHoursOTAdjusted =>
+        Total1125 * 1.125m
+        + Total125 * 1.25m
+        + Total15 * 1.5m
+        + Total175 * 1.75m
+        + Total20 * 2.0m
+        + ExcessWorkingHours * 1.25m;
+
+    public string TotalHoursOTDisplay => $"{TotalHoursOT:N2}({TotalHoursOTAdjusted:N2})";
 
     [ObservableProperty] private decimal excessWorkingHours;
     [ObservableProperty] private string catatanLampiranE;
@@ -102,6 +112,9 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
         OnPropertyChanged(nameof(ExcessWorkingHours));
         OnPropertyChanged(nameof(ExcessWorkingHoursTotal));
         OnPropertyChanged(nameof(GrandTotal));
+        OnPropertyChanged(nameof(TotalHoursOT));
+        OnPropertyChanged(nameof(TotalHoursOTAdjusted));
+        OnPropertyChanged(nameof(TotalHoursOTDisplay));
         OnPropertyChanged(nameof(HourlyRate));
     }
 
