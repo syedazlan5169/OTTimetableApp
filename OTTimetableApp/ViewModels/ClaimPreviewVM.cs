@@ -14,6 +14,7 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
     private readonly EmployeeService _empSvc;
     private readonly OtCalculatorService _otSvc;
     private readonly ExcelExportService _excelSvc;
+    private readonly AuditLogService _auditSvc;
     public decimal Total1125 => Lines.Where(x => x.IsChecked).Sum(x => x.H1125 ?? 0);
     public decimal Total125 => Lines.Where(x => x.IsChecked).Sum(x => x.H125 ?? 0);
     public decimal Total15 => Lines.Where(x => x.IsChecked).Sum(x => x.H15 ?? 0);
@@ -80,12 +81,13 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
     [ObservableProperty] private int selectedMonth;
     [ObservableProperty] private int selectedEmployeeId;
 
-    public ClaimPreviewVM(MonthViewService monthSvc, EmployeeService empSvc, OtCalculatorService otSvc, ExcelExportService excelSvc)
+    public ClaimPreviewVM(MonthViewService monthSvc, EmployeeService empSvc, OtCalculatorService otSvc, ExcelExportService excelSvc, AuditLogService auditSvc)
     {
         _monthSvc = monthSvc;
         _empSvc = empSvc;
         _otSvc = otSvc;
         _excelSvc = excelSvc;
+        _auditSvc = auditSvc;
 
         var settings = ClaimSettings.Load();
         CatatanLampiranE = settings.CatatanLampiranE;
@@ -185,6 +187,10 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
 
         if (SelectedCalendarId == 0) throw new InvalidOperationException("Select a calendar.");
         if (SelectedEmployeeId == 0) throw new InvalidOperationException("Select an employee.");
+
+        var employee = _empSvc.GetAll().FirstOrDefault(e => e.Id == SelectedEmployeeId);
+        if (employee == null)
+            throw new InvalidOperationException("Employee not found");
 
         var claimResult = _otSvc.BuildMonthlyClaim(SelectedCalendarId, SelectedEmployeeId, SelectedMonth);
         var claimLines = claimResult.ClaimLines;
@@ -352,6 +358,15 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
         AllChecked = true;
         AttachLineHandlers();
         RefreshTotals();
+
+        try
+        {
+            _auditSvc.Log("ClaimGenerated", $"Generated claim for {employee.Name} for calendarId:{SelectedCalendarId} month:{SelectedMonth}");
+        }
+        catch
+        {
+            // Swallow audit logging errors so UI action is not disrupted
+        }
     }
 
     public void ExportToExcel()
@@ -417,6 +432,15 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
             new ClaimSettings { CatatanLampiranE = CatatanLampiranE, CatatanLampiranA = CatatanLampiranA }.Save();
 
             System.Windows.MessageBox.Show("Export successful!", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+            try
+            {
+                _auditSvc.Log("ClaimExported", $"Exported claim for {employee.Name} with {checkedLines.Count} lines", SelectedCalendarId);
+            }
+            catch
+            {
+                // Ignore audit logging failures
+            }
 
             // Open the folder location
             var folderPath = Path.GetDirectoryName(saveDialog.FileName);
