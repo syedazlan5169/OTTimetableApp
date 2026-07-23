@@ -220,7 +220,8 @@ public class OtCalculatorService
                                     UiShiftTo = uiShiftTo,
                                     ReplacedEmployeeId = sl.ReplacedEmployeeId,
                                     SlotFillType = (int)sl.FillType,
-                                    ShiftGroupId = sh.GroupId
+                                    ShiftGroupId = sh.GroupId,
+                                    LeaveReason = sl.LeaveReason
                                 });
                             }
                         }
@@ -242,7 +243,8 @@ public class OtCalculatorService
                         UiShiftTo = uiShiftTo,
                         ReplacedEmployeeId = sl.ReplacedEmployeeId,
                         SlotFillType = (int)sl.FillType,
-                        ShiftGroupId = sh.GroupId
+                        ShiftGroupId = sh.GroupId,
+                        LeaveReason = sl.LeaveReason
                     });
                 }
             }
@@ -352,7 +354,8 @@ public class OtCalculatorService
                     UiShiftTo = s.UiShiftTo,
                     ReplacedEmployeeId = s.ReplacedEmployeeId,
                     SlotFillType = s.SlotFillType,
-                    ShiftGroupId = s.ShiftGroupId
+                    ShiftGroupId = s.ShiftGroupId,
+                    LeaveReason = s.LeaveReason
                 });
                 continue;
             }
@@ -392,7 +395,8 @@ public class OtCalculatorService
                 UiShiftTo = s.UiShiftTo,
                 ReplacedEmployeeId = s.ReplacedEmployeeId,
                 SlotFillType = s.SlotFillType,
-                ShiftGroupId = s.ShiftGroupId
+                ShiftGroupId = s.ShiftGroupId,
+                LeaveReason = s.LeaveReason
             });
         }
 
@@ -478,7 +482,8 @@ public class OtCalculatorService
                         UiShiftTo = r.UiShiftTo,
                         ReplacedEmployeeId = r.ReplacedEmployeeId,
                         SlotFillType = r.SlotFillType,
-                        ShiftGroupId = r.ShiftGroupId
+                        ShiftGroupId = r.ShiftGroupId,
+                        LeaveReason = r.LeaveReason
                     });
                 }
 
@@ -547,7 +552,8 @@ public class OtCalculatorService
                         UiShiftTo = s.UiShiftTo,
                         ReplacedEmployeeId = s.ReplacedEmployeeId,
                         SlotFillType = s.SlotFillType,
-                        ShiftGroupId = s.ShiftGroupId
+                        ShiftGroupId = s.ShiftGroupId,
+                        LeaveReason = s.LeaveReason
                     });
                 }
 
@@ -566,7 +572,8 @@ public class OtCalculatorService
                         UiShiftTo = s.UiShiftTo,
                         ReplacedEmployeeId = s.ReplacedEmployeeId,
                         SlotFillType = s.SlotFillType,
-                        ShiftGroupId = s.ShiftGroupId
+                        ShiftGroupId = s.ShiftGroupId,
+                        LeaveReason = s.LeaveReason
                     });
                 }
             }
@@ -603,7 +610,8 @@ public class OtCalculatorService
                 UiShiftTo = s.UiShiftTo,
                 ReplacedEmployeeId = s.ReplacedEmployeeId,
                 SlotFillType = s.SlotFillType,
-                ShiftGroupId = s.ShiftGroupId
+                ShiftGroupId = s.ShiftGroupId,
+                LeaveReason = s.LeaveReason
             };
         }
 
@@ -836,6 +844,7 @@ public class OtCalculatorService
         public int? ReplacedEmployeeId { get; set; }
         public int SlotFillType { get; set; }
         public int ShiftGroupId { get; set; }
+        public LeaveReason? LeaveReason { get; set; }
     }
 
     private sealed class RawSeg
@@ -852,5 +861,6 @@ public class OtCalculatorService
         public int? ReplacedEmployeeId { get; set; }
         public int SlotFillType { get; set; }
         public int ShiftGroupId { get; set; }
+        public LeaveReason? LeaveReason { get; set; }
     }
 }

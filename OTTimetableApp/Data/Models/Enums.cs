@@ -14,3 +14,9 @@ public enum SlotFillType
     EmptyFill = 3,    // filled an originally empty warrant
     Empty = 4         // no one assigned
 }
+
+public enum LeaveReason
+{
+    Bercuti = 1,
+    Berkursus = 2
+}

@@ -15,7 +15,25 @@ public class SlotUpdateService
         _auditSvc = auditSvc;
     }
 
-    public void UpdateSlot(int slotId, int? newEmployeeId)
+    // Determine whether applying newEmployeeId to this slot would result in a Replacement
+    // (i.e. a planned member being replaced by someone else). Used by the UI to decide
+    // whether to prompt for a leave reason before saving.
+    public bool IsReplacementCase(int slotId, int? newEmployeeId)
+    {
+        if (newEmployeeId == null) return false;
+
+        using var db = _dbFactory.CreateDbContext();
+
+        var slot = db.ShiftSlots.First(s => s.Id == slotId);
+        var planned = slot.PlannedEmployeeId;
+
+        if (planned == null) return false;               // CASE 2 - empty warrant
+        if (newEmployeeId == planned) return false;       // CASE 3 - same person
+
+        return true;                                      // CASE 4 - replacement
+    }
+
+    public void UpdateSlot(int slotId, int? newEmployeeId, LeaveReason? leaveReason = null)
     {
         using var db = _dbFactory.CreateDbContext();
 
@@ -45,6 +63,7 @@ public class SlotUpdateService
         {
             slot.ActualEmployeeId = null;
             slot.ReplacedEmployeeId = null;
+            slot.LeaveReason = null;
             slot.FillType = SlotFillType.Empty;
             db.SaveChanges();
             _auditSvc.Log("SlotCleared",
@@ -63,6 +82,7 @@ public class SlotUpdateService
         {
             slot.ActualEmployeeId = newEmployeeId;
             slot.ReplacedEmployeeId = null;
+            slot.LeaveReason = null;
             slot.FillType = SlotFillType.EmptyFill;
             db.SaveChanges();
             _auditSvc.Log("SlotFilled",
@@ -76,6 +96,7 @@ public class SlotUpdateService
         {
             slot.ActualEmployeeId = newEmployeeId;
             slot.ReplacedEmployeeId = null;
+            slot.LeaveReason = null;
             slot.FillType = SlotFillType.Planned;
             db.SaveChanges();
             _auditSvc.Log("SlotAssigned",
@@ -99,6 +120,7 @@ public class SlotUpdateService
 
         slot.ActualEmployeeId = newEmployeeId;
         slot.ReplacedEmployeeId = planned;
+        slot.LeaveReason = leaveReason;
         slot.FillType = SlotFillType.Replacement;
         db.SaveChanges();
 

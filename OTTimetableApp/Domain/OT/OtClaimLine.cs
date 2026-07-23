@@ -39,4 +39,5 @@ public class OtClaimLine
     public int? ReplacedEmployeeId { get; set; }
     public int SlotFillType { get; set; }  // 1=Planned, 2=Replacement, 3=EmptyFill, 4=Empty
     public int ShiftGroupId { get; set; }
+    public OTTimetableApp.Data.Models.LeaveReason? LeaveReason { get; set; }
 }

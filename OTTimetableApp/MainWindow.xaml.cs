@@ -142,7 +142,22 @@ public partial class MainWindow : Window
             int? selected = cb.SelectedValue as int?;
             if (selected == 0) selected = null;
 
-            _slotSvc.UpdateSlot(slotVm.ShiftSlotId, selected);
+            if (_slotSvc.IsReplacementCase(slotVm.ShiftSlotId, selected))
+            {
+                var reasonWin = new LeaveReasonWindow { Owner = this };
+                if (reasonWin.ShowDialog() != true)
+                {
+                    // Cancelled: revert the ComboBox to its previous value
+                    cb.SelectedValue = slotVm.ActualEmployeeId ?? 0;
+                    return;
+                }
+
+                _slotSvc.UpdateSlot(slotVm.ShiftSlotId, selected, reasonWin.SelectedReason);
+            }
+            else
+            {
+                _slotSvc.UpdateSlot(slotVm.ShiftSlotId, selected);
+            }
 
             await _vm.LoadMonthAsync();
         }

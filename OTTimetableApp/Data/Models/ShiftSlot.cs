@@ -22,5 +22,8 @@ public class ShiftSlot
     public int? ReplacedEmployeeId { get; set; }
     public Employee? ReplacedEmployee { get; set; }
 
+    // Reason the replaced employee is on leave (only set for Replacement fill type)
+    public LeaveReason? LeaveReason { get; set; }
+
     public SlotFillType FillType { get; set; } = SlotFillType.Planned;
 }

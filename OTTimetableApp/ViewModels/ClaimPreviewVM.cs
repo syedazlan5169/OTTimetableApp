@@ -195,6 +195,16 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
         return groupName;
     }
 
+    private static string LeaveReasonToDisplay(OTTimetableApp.Data.Models.LeaveReason reason)
+    {
+        return reason switch
+        {
+            OTTimetableApp.Data.Models.LeaveReason.Bercuti => "Cuti",
+            OTTimetableApp.Data.Models.LeaveReason.Berkursus => "Kursus",
+            _ => reason.ToString()
+        };
+    }
+
     public void Generate()
     {
         Lines.Clear();
@@ -258,9 +268,16 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
                         var groups = _empSvc.GetGroups();
                         var group = groups.FirstOrDefault(g => g.Id == firstLine.ShiftGroupId);
 
+                        var leaveReasonText = firstLine.LeaveReason.HasValue
+                            ? LeaveReasonToDisplay(firstLine.LeaveReason.Value)
+                            : null;
+
                         remark = group != null
                             ? $"Ganti {replacedName} Kump {GetGroupLabel(group.Name)}"
                             : $"Ganti {replacedName}";
+
+                        if (!string.IsNullOrEmpty(leaveReasonText))
+                            remark += $" ({leaveReasonText})";
                     }
                 }
             }
