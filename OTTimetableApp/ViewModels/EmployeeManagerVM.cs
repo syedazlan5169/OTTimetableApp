@@ -75,6 +75,7 @@ public class EmployeeManagerVM : INotifyPropertyChanged
             filtered = filtered.Where(e =>
                 (e.Name ?? "").ToLowerInvariant().Contains(s) ||
                 (e.FullName ?? "").ToLowerInvariant().Contains(s) ||
+                (e.AlternateName ?? "").ToLowerInvariant().Contains(s) ||
                 (e.IcNo ?? "").ToLowerInvariant().Contains(s));
         }
 
@@ -132,6 +133,7 @@ public class EmployeeManagerVM : INotifyPropertyChanged
             Id = src.Id,
             Name = src.Name,
             FullName = src.FullName,
+            AlternateName = src.AlternateName,
 
             IcNo = src.IcNo,
             PikNo = src.PikNo,

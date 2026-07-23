@@ -8,6 +8,7 @@ public class Employee
     public int? BaseGroupId { get; set; }
     public Group? BaseGroup { get; set; }
     public string FullName { get; set; } = "";      // Nama Penuh
+    public string? AlternateName { get; set; }      // Nama Lain
     public string? IcNo { get; set; }               // No. KP
     public string? PikNo { get; set; }              // No. PiK
     public string? Branch { get; set; }             // Cawangan

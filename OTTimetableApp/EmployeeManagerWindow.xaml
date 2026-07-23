@@ -68,6 +68,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Short Name:" VerticalAlignment="Center"/>
@@ -76,41 +77,44 @@
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Full Name:" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="1" Grid.Column="1" Height="26" Text="{Binding Edit.FullName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="No. KP:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Height="26" Text="{Binding Edit.IcNo, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Alternate Name:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Height="26" Text="{Binding Edit.AlternateName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="No. PiK:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Height="26" Text="{Binding Edit.PikNo, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="No. KP:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Height="26" Text="{Binding Edit.IcNo, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Cawangan:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Height="26" Text="{Binding Edit.Branch, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="No. PiK:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Height="26" Text="{Binding Edit.PikNo, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" Text="No. Telefon:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="5" Grid.Column="1" Height="26" Text="{Binding Edit.PhoneNo, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Cawangan:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="5" Grid.Column="1" Height="26" Text="{Binding Edit.Branch, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Gaji (RM):" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="6" Grid.Column="1" Height="26"
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="No. Telefon:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="6" Grid.Column="1" Height="26" Text="{Binding Edit.PhoneNo, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Gaji (RM):" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="7" Grid.Column="1" Height="26"
                              Text="{Binding Edit.Salary, UpdateSourceTrigger=LostFocus, ValidatesOnExceptions=True, NotifyOnValidationError=True}"
                              PreviewTextInput="Salary_PreviewTextInput"
                              LostFocus="Salary_LostFocus"/>
 
-                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Kadar Satu Jam:" VerticalAlignment="Center"/>
-                    <Border Grid.Row="7" Grid.Column="1" Height="26" Background="#FFF3F3F3" CornerRadius="3" Padding="6,0">
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Kadar Satu Jam:" VerticalAlignment="Center"/>
+                    <Border Grid.Row="8" Grid.Column="1" Height="26" Background="#FFF3F3F3" CornerRadius="3" Padding="6,0">
                         <TextBlock Text="{Binding HourlyRateDisplay}"
                                    VerticalAlignment="Center"/>
                     </Border>
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" Text="No. Gaji:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="8" Grid.Column="1" Height="26" Text="{Binding Edit.SalaryNo, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="9" Grid.Column="0" Text="No. Gaji:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="9" Grid.Column="1" Height="26" Text="{Binding Edit.SalaryNo, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Nama Bank:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="9" Grid.Column="1" Height="26" Text="{Binding Edit.BankName, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Nama Bank:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="10" Grid.Column="1" Height="26" Text="{Binding Edit.BankName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="10" Grid.Column="0" Text="Akaun Bank:" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="10" Grid.Column="1" Height="26" Text="{Binding Edit.BankAccountNo, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Grid.Row="11" Grid.Column="0" Text="Akaun Bank:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="11" Grid.Column="1" Height="26" Text="{Binding Edit.BankAccountNo, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBlock Grid.Row="11" Grid.Column="0" Text="Base Group:" VerticalAlignment="Center"/>
-                    <DockPanel Grid.Row="11" Grid.Column="1">
+                    <TextBlock Grid.Row="12" Grid.Column="0" Text="Base Group:" VerticalAlignment="Center"/>
+                    <DockPanel Grid.Row="12" Grid.Column="1">
                         <TextBlock Text="{Binding BaseGroupDisplay}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center"/>

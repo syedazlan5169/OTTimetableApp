@@ -58,6 +58,7 @@ public class EmployeeService
 
             existing.Name = e.Name.Trim();
             existing.FullName = e.FullName.Trim();
+            existing.AlternateName = e.AlternateName?.Trim();
 
             existing.IcNo = e.IcNo?.Trim();
             existing.PikNo = e.PikNo?.Trim();

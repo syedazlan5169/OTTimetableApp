@@ -181,6 +181,20 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
         };
     }
 
+    private static string GetGroupLabel(string groupName)
+    {
+        if (string.IsNullOrWhiteSpace(groupName))
+            return groupName;
+
+        if (groupName.StartsWith("KUMPULAN ", StringComparison.OrdinalIgnoreCase))
+            return groupName.Substring("KUMPULAN ".Length).Trim();
+
+        if (groupName.StartsWith("KUMPULAN", StringComparison.OrdinalIgnoreCase))
+            return groupName.Substring("KUMPULAN".Length).Trim();
+
+        return groupName;
+    }
+
     public void Generate()
     {
         Lines.Clear();
@@ -237,7 +251,16 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
                     var replacedEmp = _empSvc.GetAll().FirstOrDefault(e => e.Id == firstLine.ReplacedEmployeeId.Value);
                     if (replacedEmp != null)
                     {
-                        remark = $"Ganti {replacedEmp.Name}";
+                        var replacedName = !string.IsNullOrWhiteSpace(replacedEmp.AlternateName)
+                            ? replacedEmp.AlternateName
+                            : replacedEmp.Name;
+
+                        var groups = _empSvc.GetGroups();
+                        var group = groups.FirstOrDefault(g => g.Id == firstLine.ShiftGroupId);
+
+                        remark = group != null
+                            ? $"Ganti {replacedName} Kump {GetGroupLabel(group.Name)}"
+                            : $"Ganti {replacedName}";
                     }
                 }
             }
