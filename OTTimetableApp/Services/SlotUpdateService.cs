@@ -15,22 +15,24 @@ public class SlotUpdateService
         _auditSvc = auditSvc;
     }
 
-    // Determine whether applying newEmployeeId to this slot would result in a Replacement
-    // (i.e. a planned member being replaced by someone else). Used by the UI to decide
-    // whether to prompt for a leave reason before saving.
-    public bool IsReplacementCase(int slotId, int? newEmployeeId)
+    // Determine whether applying newEmployeeId to this slot requires prompting the user for
+    // a leave reason. This covers:
+    //  - Replacement: a planned member being replaced by someone else (CASE 4)
+    //  - Unfilled leave: a planned member being cleared to "None" with no replacement (CASE 1
+    //    where a planned member existed) - they are still on leave, just the slot stays empty.
+    public bool RequiresLeaveReason(int slotId, int? newEmployeeId)
     {
-        if (newEmployeeId == null) return false;
-
         using var db = _dbFactory.CreateDbContext();
 
         var slot = db.ShiftSlots.First(s => s.Id == slotId);
         var planned = slot.PlannedEmployeeId;
 
-        if (planned == null) return false;               // CASE 2 - empty warrant
-        if (newEmployeeId == planned) return false;       // CASE 3 - same person
+        if (planned == null) return false;                // no planned member to be on leave
 
-        return true;                                      // CASE 4 - replacement
+        if (newEmployeeId == null) return true;            // CASE 1 - cleared, planned member on leave, no replacement
+        if (newEmployeeId == planned) return false;        // CASE 3 - same person, working as planned
+
+        return true;                                       // CASE 4 - replacement
     }
 
     // Returns the currently persisted ActualEmployeeId for this slot, straight from the DB.
@@ -74,8 +76,10 @@ public class SlotUpdateService
         if (newEmployeeId == null)
         {
             slot.ActualEmployeeId = null;
-            slot.ReplacedEmployeeId = null;
-            slot.LeaveReason = null;
+            // Keep track of who is on leave even though nobody replaced them,
+            // so the reason can be reported later (e.g. in Excel export).
+            slot.ReplacedEmployeeId = planned;
+            slot.LeaveReason = planned != null ? leaveReason : null;
             slot.FillType = SlotFillType.Empty;
             db.SaveChanges();
             _auditSvc.Log("SlotCleared",

@@ -142,7 +142,7 @@ public partial class MainWindow : Window
             int? selected = cb.SelectedValue as int?;
             if (selected == 0) selected = null;
 
-            if (_slotSvc.IsReplacementCase(slotVm.ShiftSlotId, selected))
+            if (_slotSvc.RequiresLeaveReason(slotVm.ShiftSlotId, selected))
             {
                 var reasonWin = new LeaveReasonWindow { Owner = this };
                 if (reasonWin.ShowDialog() != true)
