@@ -33,6 +33,18 @@ public class SlotUpdateService
         return true;                                      // CASE 4 - replacement
     }
 
+    // Returns the currently persisted ActualEmployeeId for this slot, straight from the DB.
+    // Used by the UI to revert a ComboBox selection when the user cancels the leave-reason
+    // prompt, since the ComboBox's two-way binding already mutated the VM before save.
+    public int? GetPersistedActualEmployeeId(int slotId)
+    {
+        using var db = _dbFactory.CreateDbContext();
+        return db.ShiftSlots
+            .Where(s => s.Id == slotId)
+            .Select(s => s.ActualEmployeeId)
+            .First();
+    }
+
     public void UpdateSlot(int slotId, int? newEmployeeId, LeaveReason? leaveReason = null)
     {
         using var db = _dbFactory.CreateDbContext();

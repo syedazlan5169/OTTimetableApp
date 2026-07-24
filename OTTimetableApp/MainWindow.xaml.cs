@@ -147,8 +147,10 @@ public partial class MainWindow : Window
                 var reasonWin = new LeaveReasonWindow { Owner = this };
                 if (reasonWin.ShowDialog() != true)
                 {
-                    // Cancelled: revert the ComboBox to its previous value
-                    cb.SelectedValue = slotVm.ActualEmployeeId ?? 0;
+                    // Cancelled: revert the ComboBox to the value still persisted in the DB.
+                    // (slotVm.ActualEmployeeId is already mutated by the two-way binding,
+                    // so it cannot be trusted here.)
+                    cb.SelectedValue = _slotSvc.GetPersistedActualEmployeeId(slotVm.ShiftSlotId) ?? 0;
                     return;
                 }
 
