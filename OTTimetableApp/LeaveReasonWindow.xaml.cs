@@ -14,6 +14,7 @@ public partial class LeaveReasonWindow : Window
 
     private void Reason_Checked(object sender, RoutedEventArgs e)
     {
+        if (OkButton == null) return;
         OkButton.IsEnabled = BercutiRadio.IsChecked == true || BerkursusRadio.IsChecked == true;
     }
 
