@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using OTTimetableApp.ViewModels;
 
 namespace OTTimetableApp;
@@ -6,11 +7,13 @@ namespace OTTimetableApp;
 public partial class ClaimPreviewWindow : Window
 {
     private readonly ClaimPreviewVM _vm;
+    private readonly IServiceProvider _sp;
 
-    public ClaimPreviewWindow(ClaimPreviewVM vm)
+    public ClaimPreviewWindow(ClaimPreviewVM vm, IServiceProvider sp)
     {
         InitializeComponent();
         _vm = vm;
+        _sp = sp;
         DataContext = _vm;
 
         Loaded += OnLoaded;
@@ -51,5 +54,12 @@ public partial class ClaimPreviewWindow : Window
         {
             MessageBox.Show(ex.Message, "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private void Bulk_Click(object sender, RoutedEventArgs e)
+    {
+        var win = _sp.GetRequiredService<BulkClaimWindow>();
+        win.Owner = this;
+        win.ShowDialog();
     }
 }

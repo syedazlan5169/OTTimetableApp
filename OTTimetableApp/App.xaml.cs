@@ -101,6 +101,7 @@ public partial class App : Application
                 services.AddSingleton<EmployeeService>();
                 services.AddSingleton<ExcelExportService>();
                 services.AddSingleton<PdfExportService>();
+                services.AddSingleton<ClaimGenerationService>();
                 services.AddTransient<EmployeeManagerVM>();
                 services.AddTransient<EmployeeManagerWindow>();
                 services.AddSingleton<GroupManagerService>();
@@ -108,6 +109,8 @@ public partial class App : Application
                 services.AddTransient<GroupManagerWindow>();
                 services.AddTransient<ClaimPreviewVM>();
                 services.AddTransient<ClaimPreviewWindow>();
+                services.AddTransient<BulkClaimVM>();
+                services.AddTransient<BulkClaimWindow>();
                 services.AddTransient<DatabaseSetupWindow>();
                 services.AddTransient<DateRangePickerDialog>();
                 services.AddTransient<AuditLogWindow>();

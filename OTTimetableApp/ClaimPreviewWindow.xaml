@@ -1,7 +1,7 @@
 ﻿<Window x:Class="OTTimetableApp.ClaimPreviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Create Claim" Height="720" Width="1036"
+        Title="Create Claim" Height="720" Width="1118"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <Grid Margin="12">
         <Grid.RowDefinitions>
@@ -37,6 +37,8 @@
                           SelectedValue="{Binding SelectedEmployeeId}"/>
 
                 <Button Content="Generate" Width="120" Margin="12,0,0,0" Click="Generate_Click"/>
+
+                <Button Content="Bulk" Width="100" Margin="8,0,0,0" Click="Bulk_Click"/>
 
                 <CheckBox Content="All"
                           Margin="12,0,0,0"
