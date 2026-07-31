@@ -125,12 +125,15 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="30" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{Binding HourlyRate, StringFormat=Hourly Rate: RM {0:N2}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="DarkGreen" />
                 <TextBlock Grid.Column="2" Margin="6,0,0,0" Text="{Binding ExcessWorkingHours, StringFormat=Lebihan Jam Bertugas: {0:N2} hours}" FontWeight="Bold" VerticalAlignment="Center" Foreground="DarkGreen" />
                 <TextBlock Grid.Column="4" Margin="12,0,0,0" Text="{Binding TotalHoursOTDisplay, StringFormat=Total Hours Claim: {0}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="DarkGreen" />
+                <TextBlock Grid.Column="6" Margin="12,0,0,0" Text="{Binding OneThirdGaji, StringFormat=1/3 Gaji: RM {0:N2}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="DarkGreen" />
             </Grid>
 
             <!-- Last row: Grand Total -->

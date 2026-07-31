@@ -120,6 +120,7 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
         OnPropertyChanged(nameof(TotalHoursOTAdjusted));
         OnPropertyChanged(nameof(TotalHoursOTDisplay));
         OnPropertyChanged(nameof(HourlyRate));
+        OnPropertyChanged(nameof(OneThirdGaji));
     }
 
     private void AttachLineHandlers()
@@ -154,6 +155,18 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
 
             var raw = emp.Salary.Value * 12m / 2504m;
             return Math.Truncate(raw * 100m) / 100m;
+        }
+    }
+
+    public decimal OneThirdGaji
+    {
+        get
+        {
+            var emp = _empSvc.GetAll().FirstOrDefault(x => x.Id == SelectedEmployeeId);
+            if (emp?.Salary == null)
+                return 0m;
+
+            return emp.Salary.Value / 3m;
         }
     }
 
