@@ -85,6 +85,15 @@ public partial class BulkClaimVM : ObservableObject
         return Math.Truncate(raw * 100m) / 100m;
     }
 
+    private decimal ComputeOneThirdGaji(int employeeId)
+    {
+        var emp = _empSvc.GetAll().FirstOrDefault(x => x.Id == employeeId);
+        if (emp?.Salary == null)
+            return 0m;
+
+        return emp.Salary.Value / 3m;
+    }
+
     /// <summary>
     /// Generates claims for all checked employees. Employees that fail (no group assigned,
     /// no claim lines, etc.) are marked with an error status but do not stop the batch.
@@ -104,6 +113,7 @@ public partial class BulkClaimVM : ObservableObject
             {
                 var result = _claimGenSvc.BuildClaimLines(SelectedCalendarId, emp.Id, SelectedMonth);
                 emp.HourlyRate = ComputeHourlyRate(emp.Id);
+                emp.OneThirdGaji = ComputeOneThirdGaji(emp.Id);
                 emp.ExcessWorkingHours = result.ExcessWorkingHours;
                 emp.Lines = result.Lines;
                 emp.CatatanLampiranE = CatatanLampiranE;
