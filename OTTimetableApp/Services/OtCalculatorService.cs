@@ -705,12 +705,14 @@ public class OtCalculatorService
             // PHG only if base group OFF during PH
             if (d.OffGroupId != baseGroupId) continue;
 
-            // next day where base group is working (not OFF)
+            // next day where:
+            // 1. base group is working (not OFF)
+            // 2. day is NOT a public holiday
             for (int j = i + 1; j < days.Count; j++)
             {
                 var next = days[j];
 
-                if (next.OffGroupId != baseGroupId)
+                if (next.OffGroupId != baseGroupId && !next.IsPublicHoliday)
                 {
                     result.Add(next.Date);
                     break;
