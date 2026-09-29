@@ -41,4 +41,24 @@ public partial class BulkEmployeeSelectionVM : ObservableObject
             return ExceedClaimAmount / HourlyRate;
         }
     }
+
+    partial void OnGrandTotalChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(IsClaimExceedsOneThird));
+        OnPropertyChanged(nameof(ExceedClaimAmount));
+        OnPropertyChanged(nameof(ExceedClaimHours));
+    }
+
+    partial void OnOneThirdGajiChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(IsClaimExceedsOneThird));
+        OnPropertyChanged(nameof(ExceedClaimAmount));
+        OnPropertyChanged(nameof(ExceedClaimHours));
+    }
+
+    partial void OnHourlyRateChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(ExceedClaimHours));
+    }
 }
+
