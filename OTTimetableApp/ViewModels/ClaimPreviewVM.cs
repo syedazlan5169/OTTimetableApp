@@ -39,6 +39,28 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
 
     public string TotalHoursOTDisplay => $"{TotalHoursOT:N2}({TotalHoursOTAdjusted:N2})";
 
+    public bool IsClaimExceedsOneThird => GrandTotal > OneThirdGaji && OneThirdGaji > 0;
+
+    public decimal ExceedClaimAmount => IsClaimExceedsOneThird ? GrandTotal - OneThirdGaji : 0m;
+
+    public decimal ExceedClaimHours
+    {
+        get
+        {
+            if (!IsClaimExceedsOneThird) return 0m;
+
+            // Calculate excess hours based on the overage amount
+            if (HourlyRate <= 0) return 0m;
+
+            return ExceedClaimAmount / HourlyRate;
+        }
+    }
+
+    public string ExceedClaimMessage =>
+        IsClaimExceedsOneThird
+            ? $"Your total claim has exceed 1/3 gaji by RM {ExceedClaimAmount:N2} / {ExceedClaimHours:N2} hours."
+            : "";
+
     [ObservableProperty] private decimal excessWorkingHours;
     [ObservableProperty] private string catatanLampiranE;
     [ObservableProperty] private string catatanLampiranA;
@@ -121,6 +143,10 @@ public partial class ClaimPreviewVM : ObservableObject, IDisposable
         OnPropertyChanged(nameof(TotalHoursOTDisplay));
         OnPropertyChanged(nameof(HourlyRate));
         OnPropertyChanged(nameof(OneThirdGaji));
+        OnPropertyChanged(nameof(IsClaimExceedsOneThird));
+        OnPropertyChanged(nameof(ExceedClaimAmount));
+        OnPropertyChanged(nameof(ExceedClaimHours));
+        OnPropertyChanged(nameof(ExceedClaimMessage));
     }
 
     private void AttachLineHandlers()

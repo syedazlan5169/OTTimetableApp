@@ -3,6 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Create Claim" Height="720" Width="1118"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -137,6 +140,13 @@
             </Grid>
 
             <!-- Last row: Grand Total -->
+            <TextBlock Margin="0,8,0,0"
+               FontSize="14"
+               FontWeight="Bold"
+               Foreground="DarkOrange"
+               Text="{Binding ExceedClaimMessage}"
+               Visibility="{Binding IsClaimExceedsOneThird, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
             <TextBlock Margin="0,8,0,0"
                FontSize="16"
                FontWeight="Bold"
